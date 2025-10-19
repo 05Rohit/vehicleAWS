@@ -23,7 +23,7 @@ const server = http.createServer(app);
 // ✅ Configure CORS (must come first)
 app.use(
   cors({
-    origin: process.env.FRONTEND,        // e.g., https://your-frontend.vercel.app
+    origin: process.env.FRONTEND,      
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"," PATCH"],
   })
