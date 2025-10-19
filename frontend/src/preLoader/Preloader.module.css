@@ -1,0 +1,292 @@
+.loaderWrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1a0a00, #2d1301, #1f0f00);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+/* Background animation */
+.bgAnimation {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.bgCircle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(234, 88, 12, 0.15), transparent);
+  animation: float-bg 20s ease-in-out infinite;
+}
+
+.bgCircle:nth-child(1) {
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.bgCircle:nth-child(2) {
+  width: 200px;
+  height: 200px;
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.bgCircle:nth-child(3) {
+  width: 250px;
+  height: 250px;
+  bottom: 15%;
+  left: 50%;
+  animation-delay: 4s;
+}
+
+@keyframes float-bg {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 30px) scale(0.9); }
+}
+
+/* Loader Container */
+.loaderContainer {
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  padding: 60px 80px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+}
+
+/* Bike Scene */
+.bikeScene {
+  position: relative;
+  width: 280px;
+  height: 140px;
+  margin: 0 auto 40px;
+}
+
+/* Bike */
+.bike {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  animation: ride 2s ease-in-out infinite;
+  filter: drop-shadow(0 10px 20px rgba(234, 88, 12, 0.4));
+}
+
+/* Wheels */
+.wheel {
+  width: 60px;
+  height: 60px;
+  border: 6px solid transparent;
+  background: linear-gradient(#1a0a00, #1a0a00) padding-box,
+    linear-gradient(135deg, #ea580c, #d97706, #f97316) border-box;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 0;
+  animation: spin 1s linear infinite;
+}
+
+.front {
+  right: 30px;
+}
+
+.back {
+  left: 30px;
+}
+
+.wheel::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #ea580c, #d97706);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 15px rgba(234, 88, 12, 0.8);
+}
+
+.spoke {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ea580c, transparent);
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.spoke:nth-child(2) {
+  transform: translateY(-50%) rotate(60deg);
+}
+.spoke:nth-child(3) {
+  transform: translateY(-50%) rotate(120deg);
+}
+
+/* Frame */
+.frame {
+  position: absolute;
+  background: linear-gradient(135deg, #ea580c, #d97706);
+  transform-origin: center;
+  box-shadow: 0 0 10px rgba(234, 88, 12, 0.5);
+}
+.frame1 {
+  width: 95px;
+  height: 5px;
+  bottom: 30px;
+  left: 50px;
+  transform: rotate(-15deg);
+}
+.frame2 {
+  width: 75px;
+  height: 5px;
+  bottom: 42px;
+  left: 85px;
+  transform: rotate(35deg);
+}
+.frame3 {
+  width: 60px;
+  height: 5px;
+  bottom: 30px;
+  left: 105px;
+  transform: rotate(-45deg);
+}
+.frame4 {
+  width: 40px;
+  height: 5px;
+  bottom: 30px;
+  left: 80px;
+}
+
+/* Handlebar + Seat */
+.handlebar {
+  width: 35px;
+  height: 5px;
+  background: linear-gradient(135deg, #ea580c, #d97706);
+  position: absolute;
+  right: 35px;
+  top: 25px;
+  transform: rotate(-10deg);
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(234, 88, 12, 0.5);
+}
+
+.handlebar::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #f97316;
+  border-radius: 50%;
+  right: -4px;
+  top: -2px;
+  box-shadow: 0 0 10px #f97316;
+}
+
+.seat {
+  width: 30px;
+  height: 12px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  border-radius: 6px;
+  position: absolute;
+  left: 60px;
+  top: 30px;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+}
+
+/* Road */
+.road {
+  width: 120%;
+  height: 4px;
+  background: repeating-linear-gradient(
+    to right,
+    rgba(234, 88, 12, 0.8) 0px,
+    rgba(234, 88, 12, 0.8) 30px,
+    transparent 30px,
+    transparent 50px
+  );
+  position: absolute;
+  bottom: -25px;
+  left: -10%;
+  animation: road-move 1.2s linear infinite;
+  box-shadow: 0 0 20px rgba(234, 88, 12, 0.6);
+  border-radius: 2px;
+}
+
+/* Texts */
+.loaderTitle {
+  color: #fff;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  background: linear-gradient(135deg, #ea580c, #d97706, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.loadingText {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 18px;
+  letter-spacing: 3px;
+  margin-bottom: 30px;
+}
+
+.progressContainer {
+  width: 280px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #ea580c, #d97706, #f97316, #ea580c);
+  background-size: 200% 100%;
+  border-radius: 10px;
+  animation: progress-load 2s ease-in-out infinite;
+}
+
+.percentage {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  margin-top: 15px;
+  letter-spacing: 1px;
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes ride {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes road-move {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(50px); }
+}
+
+@keyframes progress-load {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}

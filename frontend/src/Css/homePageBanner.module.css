@@ -1,0 +1,605 @@
+.banner_Main_Container {
+  height: 100%;
+  width: 100%;
+}
+.banner_Container {
+  height: 80vh;
+  width: 100%;
+  background-image: url("../assest/background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-clip: content-box;
+}
+.banner_Container_Content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+}
+.banner_Container_Content_leftSide {
+  width: 100%;
+  height: 100%;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.banner_Container_Content_leftSide_content {
+  width: 90%;
+}
+.banner_Container_Content_leftSide_content h2 {
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 45px;
+  color: #ffffff;
+  margin: 0;
+}
+.banner_Container_Content_leftSide_content p {
+  font-weight: normal;
+  font-size: 20px;
+  line-height: 30px;
+  color: #ffffff;
+  text-shadow: 0px 10px 4px #5c2c01;
+  margin-top: 20px;
+}
+.banner_Container_Content_rightSide {
+  width: 100%;
+  color: black;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.banner_Container_Content_rightSide_content {
+  height: 80%;
+  width: 350px;
+  background-color: white;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+@media screen and (max-width: 900px) {
+  .banner_Container_Content_rightSide_content {
+    width: max-content;
+  }
+}
+
+.banner_Container_Content_rightSide_Container_Options {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 40px;
+  width: 100%;
+  background: white;
+  padding: 5px 0px;
+  border-bottom: 1px solid rgb(150, 146, 146);
+}
+
+.banner_Container_Content_rightSide_Container_Options_Content {
+  width: 100%;
+  height: 100%;
+}
+.banner_Container_Content_rightSide_Container_Options_Content button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  width: 100%;
+}
+
+.selectedVehicleOption {
+  position: relative;
+}
+
+.selectedVehicleOption::after {
+  position: absolute;
+  content: "";
+  width: 55%;
+  left: 35px;
+  height: 2px;
+  background: rgb(77, 77, 77);
+  bottom: -6px;
+}
+.Banner_IconImage {
+  background-color: white;
+  width: 30px;
+  height: 30px;
+}
+.Banner_IconImage img {
+  width: 100%;
+  height: 100%;
+}
+.banner_Container_Content_rightSide_Container_Options_Content p {
+  font-size: 13px;
+  text-align: center;
+  margin: 0;
+}
+
+.banner_Container_Content_rightSide_Container_Form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 10px;
+  height: calc(100% - 75px);
+  width: 100%;
+}
+.banner_Container_Content_rightSide_Container_Form_Container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5px;
+  width: 100%;
+}
+.banner_Container_Content_rightSide_Container_Form_Container label {
+  font-size: 14px;
+}
+.InputTagContainer {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.InputTagContainer_InputBox {
+  max-width: 150px;
+  width: 100%;
+  height: 30px;
+  border-radius: 5px;
+  border: 1px solid rgb(162, 157, 157);
+  padding: 10px 10px;
+  font-size: 13px;
+  outline: none;
+}
+
+.InputTag {
+  width: 100%;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid rgb(55, 54, 54);
+  padding: 5px 3px;
+  font-size: 13px;
+  outline: none;
+}
+
+/* carousel Component Css start Here*/
+
+.slider_MainContainer {
+  width: 100%;
+  height: max-content;
+  padding: 20px 5px 0 5px;
+}
+.Carousel_MainBox {
+  width: inherit;
+  height: max-content;
+  position: relative;
+  top: 0;
+  left: 0;
+}
+.Carousel_ButtonContainer {
+  position: absolute;
+  top: 10%;
+  left: 60%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 30px;
+  width: 100px;
+}
+
+.container {
+  width: 95%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  height: max-content;
+}
+
+.Carousel_ButtonContainer button {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  border: none;
+  background-color: #da8652;
+}
+
+.activeButton {
+  background-color: #f69457;
+}
+
+.Carousel_ContentContainer {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  overflow: hidden;
+}
+
+.carousel_item {
+  width: inherit;
+  height: inherit;
+}
+.Carousel_InnerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+.Carousel_Inner_ImageContainer {
+  width: 40%;
+  height: 300px;
+  padding: 50px 0px;
+}
+
+.Carousel_Inner_ImageContainer img {
+  width: 350px;
+  height: 200px;
+}
+.Carousel_Inner_TextContainer {
+  width: 40%;
+  height: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5px;
+}
+.Carousel_Inner_TextContainer h5 {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 16px;
+  color: #5c2c01;
+}
+.Carousel_Inner_TextContainer h2 {
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 40px;
+  color: #000000;
+}
+.Carousel_Inner_TextContainer p {
+  font-weight: normal;
+  font-size: 20px;
+  line-height: 24px;
+  color: #000000;
+}
+
+.carousel_item_animated {
+  animation: slideInFromRight 1.5s linear;
+}
+
+/* MILE STONE CONTAINER CSS STARTS HERE */
+/* MILE STONE CONTAINER CSS STARTS HERE */
+/* MILE STONE CONTAINER CSS STARTS HERE */
+.mileStone_MainContainer {
+  width: 100%;
+  height: 100%;
+}
+.milestoneContainer {
+  width: inherit;
+  height: inherit;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background-color: #f7f7f3;
+  padding: 40px 30px 10px 50px;
+}
+.mileStone_contentBox {
+  width: 70%;
+  height: inherit;
+  min-height: 180px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  gap: 50px;
+}
+.milestoneContainer h2 {
+  font-size: 36px;
+}
+.mileStone_innerBoxes {
+  text-decoration: none;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mileStone_innerBoxes p {
+  font-size: 22px;
+}
+.CountContent {
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 36px;
+  color: #ff7a00;
+  margin-right: 10px;
+}
+
+/*Bike list container CSS starts Here*/
+.heroSection{
+  width: 100%;
+  height: max-content;
+  background: #f8fafc;
+  padding: 1rem;
+}
+
+.bikeGrid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  padding: 30px 20px 20px 30px;
+}
+
+.bikeCard {
+  width: 100%;
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: 0.3s;
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.bikeCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 20px rgba(148, 163, 184, 0.25);
+}
+
+.imageWrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.bikeImage {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.bikeCard:hover .bikeImage {
+  transform: scale(1.1);
+}
+
+.trendingBadge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #f97316;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.bikeInfo {
+  width: 100%;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 0.22rem;
+}
+
+.bikeTop {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.bikeTop h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.bikeName {
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.availabilityButton {
+  width: 100%;
+  margin-top: 1rem;
+  background: linear-gradient(to right, #f97316, #ea580c);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.availabilityButton:hover {
+  box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
+  transform: translateY(-2px);
+}
+
+/*bike_maintain_section*/
+.bike_maintain_section {
+  width: 100%;
+  height: max-content;
+  padding: 15px 20px 20px 30px;
+  background: linear-gradient(to bottom right, #f8fafc, #fff7ed, #f1f5f9);
+}
+.bike_maintain_section_Content {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  gap: 50px;
+}
+
+.bike_maintain_section_Content_ImageContainer {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.bike_maintain_section_Content_ImageContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.bike_maintain_section_Content_TextContainer {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.bike_maintain_section_Content_TextContainer_Heading {
+  width: 100%;
+  text-align: left;
+  padding: 30px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.bike_maintain_section_Content_TextContainer h2 {
+  font-weight: 500;
+  font-size: 36px;
+  color: #000000;
+}
+.bike_maintain_section_Content_TextContainer p {
+  font-weight: normal;
+  font-size: 20px;
+  color: #000000;
+}
+.bike_maintain_section_Content_TextContainer_IconsContent {
+  width: 100%;
+  height: max-content;
+}
+.bike_maintain_section_Content_TextContainer_IconsContent_list {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  min-width: 310px;
+  max-width: 70%;
+  padding: 10px 0px;
+}
+.bike_maintain_section_Content_TextContainer_IconsContent_list li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+}
+
+@media screen and (max-width: 900px) {
+  .bike_maintain_section_Content {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .bike_maintain_section_Content_ImageContainer {
+    width: 80%;
+  }
+  .bike_maintain_section_Content_TextContainer {
+    width: 80%;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .banner_Container_Content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 0;
+  }
+  .banner_Container {
+    height: max-content;
+  }
+  .banner_Container_Content_rightSide_content {
+    width: max-content;
+  }
+  .banner_Container_Content_leftSide_content h2 {
+    font-size: 25px;
+  }
+  .banner_Container_Content_leftSide_content p {
+    font-size: 17px;
+    margin-top: 10px;
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+}
+
+@media screen and (max-width: 750px) {
+  .Carousel_MainBoxe {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: max-content;
+  }
+  .container {
+    width: 100%;
+    padding: 0 30px;
+  }
+  .Carousel_Inner_TextContainer {
+    margin-top: 10px;
+  }
+  .Carousel_Inner_TextContainer h2 {
+    font-size: 25px;
+    line-height: 20px;
+  }
+  .container,
+  .Carousel_MainBox {
+    width: 100%;
+  }
+  .Carousel_ButtonContainer {
+    height: 20px;
+  }
+  .Carousel_Inner_TextContainer p {
+    font-size: 16px;
+  }
+  .Carousel_Inner_ImageContainer {
+    width: 50%;
+    height: 300px;
+    padding: 50px 0px;
+  }
+
+  .Carousel_Inner_ImageContainer img {
+    width: 100%;
+    height: 220px;
+  }
+}

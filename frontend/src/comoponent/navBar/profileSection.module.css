@@ -1,0 +1,358 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+  padding: 2rem;
+}
+
+.wrapper {
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.headerCard {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.headerFlex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profileInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profileAvatar {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #d97706, #b45309);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userIcon {
+  width: 2rem;
+  height: 2rem;
+  color: white;
+}
+
+.userName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.userEmail {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Dropdown */
+.dropdownWrapper {
+  position: relative;
+  background-color: red;
+}
+
+.profileButton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.profileButton:hover {
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  transform: scale(1.05);
+}
+
+.bellWrapper {
+  position: relative;
+}
+
+.bellIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  background: #f97316;
+  color: white;
+  font-size: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.chevronIcon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.3s;
+}
+
+.chevronRotate {
+  transform: rotate(180deg);
+}
+
+/* Dropdown menu */
+.dropdownMenu {
+  position: absolute;
+  right: 0;
+  margin-top: 0.75rem;
+  width: 18rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: fadeInSlide 0.3s ease;
+  z-index: 50;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownHeader {
+  background: linear-gradient(to right, #fff7ed, #fffbeb);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.welcomeText {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.welcomeName {
+  color: #111827;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.menuList {
+  padding: 0.5rem 0;
+}
+
+.menuItem {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: none;
+  border: none;
+  transition: background 0.2s;
+}
+
+.menuItem:hover {
+  background: #f9fafb;
+}
+
+.logoutBorder {
+  border-top: 1px solid #f3f4f6;
+}
+
+.menuIconWrapper {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bgBlueLight {
+  background: #eff6ff;
+}
+
+.bgRedLight {
+  background: #fef2f2;
+}
+
+.textBlue {
+  color: #2563eb;
+}
+
+.textGreen {
+  color: #16a34a;
+}
+
+.textOrange {
+  color: #ea580c;
+}
+
+.textPurple {
+  color: #7e22ce;
+}
+
+.textGray {
+  color: #374151;
+}
+
+.textRed {
+  color: #dc2626;
+}
+
+.menuLabel {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.dropdownBottom {
+  height: 0.25rem;
+  background: linear-gradient(to right, #2563eb, #4f46e5, #7c3aed);
+}
+
+/* Cards */
+.cardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .cardGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  transition: box-shadow 0.3s;
+}
+
+.card:hover {
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.cardTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.iconBox {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bgGreenLight {
+  background: #dcfce7;
+}
+
+.bgOrangeLight {
+  background: #ffedd5;
+}
+
+.currencySymbol {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.cardNumber {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.cardSubtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Quick Actions */
+.quickActions {
+  margin-top: 2rem;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+}
+
+.quickTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.quickGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .quickGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.quickBtn {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  background: #f3f4f6;
+  transition: all 0.3s;
+}
+
+.quickBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.quickIcon {
+  width: 2rem;
+  height: 2rem;
+  margin: 0 auto 0.5rem;
+}
+
+.quickLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}

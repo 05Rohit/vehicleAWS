@@ -1,0 +1,24 @@
+/* Footer */
+.footer {
+  background: linear-gradient(90deg, #1f2937, #1c273f);
+  color: white;
+  text-align: center;
+  padding: 1.5rem 2rem;
+  width: 100%;
+}
+
+.footerLinks {
+  margin-top: 0.2rem;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.footerLinks a {
+  color: #d1d5db;
+  text-decoration: none;
+}
+
+.footerLinks a:hover {
+  color: #f97316;
+}

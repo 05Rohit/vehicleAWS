@@ -1,0 +1,111 @@
+.container {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: white;
+  border-radius: 0.8rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  height: 95%;
+  width: 100%;
+  max-width: 380px;
+
+  overflow: hidden;
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  background: linear-gradient(to right, #eb7029, #ef8c41);
+
+  padding: 10px;
+  text-align: center;
+  color: white;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.header p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.vehicleTabs {
+  display: flex;
+  background: #f8f9fa;
+  padding: 1rem;
+  gap: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.active {
+  background: linear-gradient(135deg, #f49b67 0%, #f0894e 100%);
+  color: white;
+  border-color: #eb7029;
+}
+
+.tabIcon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.tabLabel {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Foem Style*/
+.FormContainer {
+  padding: 1.5rem;
+}
+
+.section {
+  width: 100%;
+}
+.formContainer {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.inputLabel {
+  font-size: 12px !important;
+  color: rgb(54, 47, 47);
+}
