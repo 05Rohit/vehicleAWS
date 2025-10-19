@@ -532,3 +532,24 @@ error:- [] newNotificationSchema.find(...).sort(...).toArray is not a function T
     at next (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\express\lib\router\route.js:149:13)
     at verifyToken (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\utils\verifyToken.js:31:5)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 16:59:50 
+error:- [] No booking found for this user Error: No booking found for this user
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:340:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 17:11:11 
+error:- [] No booking found for this user Error: No booking found for this user
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:340:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 17:11:15 
+error:- [] No booking found for this user Error: No booking found for this user
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:340:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 17:12:44 
+error:- [] No booking found for this user Error: No booking found for this user
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:340:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 17:12:46 
+error:- [] No booking found for this user Error: No booking found for this user
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:340:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 17:13:03 
+error:- [] No booking found for this user Error: No booking found for this user
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:340:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 17:13:13 
+error:- [] No booking found for this user Error: No booking found for this user
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:340:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 17:13:35 
