@@ -8,14 +8,7 @@ import Logo from "../../assest/logo3.png";
 import { useToast } from "../../ContextApi/ToastContext";
 
 import { useSocket } from "../../ContextApi/NotificationContentAPI";
-import {
-  Bell,
-  Check,
-  Lock,
-  Calendar,
-  LogOut,
-  ChevronDown,
-} from "lucide-react";
+import { Bell, Check, Lock, Calendar, LogOut, ChevronDown } from "lucide-react";
 import api from "../../axiosInterceptors/AxiosSetup";
 
 const NavBar = ({ loading, userDetails, logout }) => {
@@ -27,7 +20,7 @@ const NavBar = ({ loading, userDetails, logout }) => {
   const [NotificationCount, setNotificationCount] = useState(0);
 
   const navigate = useNavigate();
-  const [userDetailsModel, setuserDetailsModel] = useState(true);
+  // const [userDetailsModel, setuserDetailsModel] = useState(true);
   const profileRef = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -66,21 +59,17 @@ const NavBar = ({ loading, userDetails, logout }) => {
     },
   ];
 
-  // Close profile dropdown when clicking outside
   useEffect(() => {
-    if (userDetailsModel) return; // Only attach listener if dropdown is open
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setuserDetailsModel(true);
+        setIsOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [userDetailsModel]);
+  }, []);
 
-  // const handleBookingNav = (status) => {
-  //   navigate("/bookinglist", { state: { selectedBooking: status } });
-  // };
   const handleGetContact = () => {
     navigate("/contactus");
   };
@@ -171,9 +160,6 @@ const NavBar = ({ loading, userDetails, logout }) => {
     }
   };
 
- 
-
-
   const handleNavigate = () => {
     navigate("/login");
   };
@@ -181,7 +167,6 @@ const NavBar = ({ loading, userDetails, logout }) => {
   const unReadNotificationCount = NotificationContent.filter(
     (n) => !n.isRead
   ).length;
-
 
   /* ====== Comments (Use) :- Return time difference ===== */
   function getTimeDifference(databaseTime) {
@@ -232,7 +217,8 @@ const NavBar = ({ loading, userDetails, logout }) => {
                 {" "}
                 Contact US{" "}
               </button>
-              {(userDetails?.userType === "admin" || userDetails?.userType === "user") && (
+              {(userDetails?.userType === "admin" ||
+                userDetails?.userType === "user") && (
                 <>
                   <button
                     onClick={() => navigate("/vehiclemanagement")}
@@ -416,11 +402,14 @@ const NavBar = ({ loading, userDetails, logout }) => {
                       </button>
 
                       {isOpen && (
-                        <div className={NavBarStyle.dropdownMenu}>
+                        <div
+                          className={NavBarStyle.dropdownMenu}
+                          ref={profileRef}
+                        >
                           <div className={NavBarStyle.dropdownHeader}>
                             <p className={NavBarStyle.welcomeText}>Welcome :</p>
                             <p className={NavBarStyle.welcomeName}>
-                              Rohit Singh
+                              {userDetails?.name}
                             </p>
                           </div>
 

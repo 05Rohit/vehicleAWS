@@ -4,7 +4,6 @@ import { Server_API } from "../../APIPoints/AllApiPonts";
 import { useToast } from "../../ContextApi/ToastContext";
 import api from "../../axiosInterceptors/AxiosSetup";
 
-
 const BookingList = () => {
   const { handleShowToast } = useToast();
   const [AllBookingDetails, setAllBookingDetails] = useState([]);
@@ -16,10 +15,9 @@ const BookingList = () => {
       });
       setAllBookingDetails(response.data.data || []);
     } catch (error) {
-      console.error("Error fetching bookings:", error);
-      setAllBookingDetails([]);
       handleShowToast("danger", "Failed to fetch details");
     } finally {
+      setAllBookingDetails([]);
     }
   };
 
@@ -33,12 +31,12 @@ const BookingList = () => {
       {/* {isLoading ? (
         <Preloader />
       ) : ( */}
-        <div style={{ width: "100%", height: "100%" }}>
-          <BookingListComponent
-            bookingList={AllBookingDetails}
-            fetchBookingsDetails={fetchBookingsDetails}
-          />
-        </div>
+      <div style={{ width: "100%", height: "100%" }}>
+        <BookingListComponent
+          bookingList={AllBookingDetails}
+          fetchBookingsDetails={fetchBookingsDetails}
+        />
+      </div>
       {/* )} */}
     </>
   );

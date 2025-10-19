@@ -29,14 +29,10 @@ const ForgotPaswswordPage = () => {
         return;
       }
 
-      const response = await api.post(`${Server_API}/forgotPasswordemail`, {
+     await api.post(`${Server_API}/forgotPasswordemail`, {
         email: value.email,
       });
-      console.log("Forgot password email response:", response.data);
-      // if(response.data.success!==true){
-      //   handleShowToast("danger", response.data.message || "Failed to send forgot password email");
-      //   return;
-      // }
+
       handleShowToast("success", "Forgot password email sent successfully");
     } catch (error) {
       console.error("Error sending forgot password email:", error);

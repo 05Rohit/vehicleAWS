@@ -23,8 +23,6 @@ const VechicleGroupUpadtesModel = ({
 }) => {
   const { handleShowToast } = useToast();
 
-  console.log("Selected Group:", selectedGroup);
-
   const [formData, setFormData] = useState({
     name: selectedGroup.name,
     model: selectedGroup.model,

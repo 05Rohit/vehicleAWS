@@ -515,3 +515,20 @@ info:- [] Notification created for user 68e55965d4642d910a78eed4  2025-10-19 11:
 info:- [] Notification created for user 68e55965d4642d910a78eed4  2025-10-19 11:24:21 
 info:- [] Notification created for user 68e55965d4642d910a78eed4  2025-10-19 11:28:22 
 info:- [] Notification created for user 68e55965d4642d910a78eed4  2025-10-19 11:28:51 
+error:- [] Invalid credentials Error: Invalid credentials
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\userContoller.js:97:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 16:57:36 
+error:- [] Cannot read properties of undefined (reading 'connect') TypeError: Cannot read properties of undefined (reading 'connect')
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\newNotificationSchemaController.js:42:16
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\utils\catchAsync.js:3:9
+    at Layer.handle [as handle_request] (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\express\lib\router\route.js:149:13)
+    at verifyToken (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\utils\verifyToken.js:31:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 16:58:56 
+error:- [] newNotificationSchema.find(...).sort(...).toArray is not a function TypeError: newNotificationSchema.find(...).sort(...).toArray is not a function
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\newNotificationSchemaController.js:44:6
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\utils\catchAsync.js:3:9
+    at Layer.handle [as handle_request] (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\express\lib\router\route.js:149:13)
+    at verifyToken (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\utils\verifyToken.js:31:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-19 16:59:50 

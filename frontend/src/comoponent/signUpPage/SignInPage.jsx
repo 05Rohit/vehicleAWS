@@ -43,12 +43,10 @@ const SignInPage = () => {
 
   const handleSignup = async () => {
     if (!value.name || !value.email || !value.password) {
-      alert("Please fill all required fields");
       return handleShowToast("danger", "Please fill all required fields");
     }
 
     if (value.password !== value.confirmPassword) {
-      alert("Passwords do not match");
       return handleShowToast("danger", "Passwords do not match");
     }
 
@@ -76,12 +74,10 @@ const SignInPage = () => {
         drivingLicNumber: "",
         userType: "",
       });
-      alert("Account Successfully created");
       handleShowToast("success", "Account Successfully created");
     } catch (error) {
       // console.error("Error:", );
       const ErrorMsg = error?.response?.data?.error;
-      alert(ErrorMsg);
       handleShowToast("success", ErrorMsg || "Login failed. Try again.");
     }
   };
