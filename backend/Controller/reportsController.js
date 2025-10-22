@@ -14,6 +14,7 @@ exports.getBookingData = catchAsync(async (req, res, next) => {
     const filteredVehicles = doc.vehicleDetails.filter((v) =>
       bookingStatus ? v.bookingStatus === bookingStatus : true
     );
+    // Console,=.liog(filteredVehicles);
 
     filteredVehicles.forEach((vehicle) => {
       matchedBookings.push({
