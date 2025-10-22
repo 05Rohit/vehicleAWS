@@ -1,0 +1,30 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "frontend",
+      "image": "frontend",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 3000, "hostPort": 3000 }
+      ]
+    },
+    {
+      "name": "backend",
+      "image": "backend",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 5000, "hostPort": 5000 }
+      ]
+    },
+    {
+      "name": "rabbitmq",
+      "image": "rabbitmq:3-management",
+      "essential": false,
+      "portMappings": [
+        { "containerPort": 5672, "hostPort": 5672 },
+        { "containerPort": 15672, "hostPort": 15672 }
+      ]
+    }
+  ]
+}
