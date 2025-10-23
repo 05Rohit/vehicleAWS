@@ -64,9 +64,9 @@ const errorHandlerMiddleware = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODEENV === "development") {
     sendErrorDev(err, res);
-  } else if (process.env.NODE_ENV === "production") {
+  } else if (process.env.NODEENV === "production") {
     let error = { ...err };
     error.message = err.message;
 

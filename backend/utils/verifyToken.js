@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../model/userModel'); // Adjust the path to your user model
-const jwtSecretKey = process.env.JWT_SECRET_KEY;
+const jwtSecretKey = process.env.JWTSECRETKEY;
 
 
 const verifyToken = async (req, res, next) => {

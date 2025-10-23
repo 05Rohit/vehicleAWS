@@ -10,7 +10,7 @@ const {
   sendNotification,
 } = require("../utils/notificationThroughMessageBroker");
 
-const jwtSecretKey = process.env.JWT_SECRET_KEY;
+const jwtSecretKey = process.env.JWTSECRETKEY;
 const FRONTENDURL = process.env.FRONTEND;
 
 exports.CreateUser = catchAsync(async (req, res, next) => {

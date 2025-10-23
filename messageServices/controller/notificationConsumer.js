@@ -3,13 +3,13 @@ const axios = require("axios");
 require("dotenv").config();
 
 const BACKEND_SERVICE_URL = process.env.BACKEND_SERVICE_URL;
-const RABBITMQ_URL = process.env.RABBITMQ_URL;
+const RABBITMQURL = process.env.RABBITMQURL;
 const MAX_RETRIES = 5;
 
 async function notificationConsumer(rolename, io) {
   try {
     // 1️⃣ Connect to RabbitMQ
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     const exchange = "notifications_topic";

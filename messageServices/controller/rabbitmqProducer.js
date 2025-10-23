@@ -5,7 +5,7 @@
 //   let connection;
 //   try {
 //     connection = await amqp.connect(
-//       process.env.RABBITMQ_URL || "amqp://localhost"
+//       process.env.RABBITMQURL || "amqp://localhost"
 //     );
 //     const channel = await connection.createChannel();
 //     await channel.assertQueue(QUEUE, { durable: true });

@@ -1,7 +1,7 @@
 require("dotenv").config();
 const amqp = require("amqplib");
 
-const RABBITMQ_URL = process.env.RABBITMQ_URL;
+const RABBITMQURL = process.env.RABBITMQURL;
 
 const sendMailToQueue = async ({
   subject,
@@ -20,7 +20,7 @@ const sendMailToQueue = async ({
   // );
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });

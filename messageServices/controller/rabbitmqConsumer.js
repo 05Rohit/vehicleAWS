@@ -13,7 +13,7 @@ const {
   userBookingStatusUpdateEmail,
 } = require("../utils/mailTemplate.jsx");
 
-const RABBITMQ_URL = process.env.RABBITMQ_URL;
+const RABBITMQURL = process.env.RABBITMQURL;
 const EXCHANGE = "emailExchange";
 const BOOKINGEXCHANGE = "bookingemailExchange";
 
@@ -27,7 +27,7 @@ const startConsumerForNewVehicle = async () => {
   const DLQ_NAME = "emailNewVehicleDLQ";
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -100,7 +100,7 @@ const startConsumerForUpdateVehicle = async () => {
   const DLQ_NAME = "vehicleUpdatedDLQ";
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -173,7 +173,7 @@ const startConsumerForDelteVehicle = async () => {
   const DLQ_NAME = "vehicleDeletedDLQ";
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -246,7 +246,7 @@ const startConsumerForUserCreation = async () => {
   const DLQ_NAME = "usercreatedDLQ";
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -318,7 +318,7 @@ const startConsumerForUserPasswordChange = async () => {
   const DLQ_NAME = "userPasswordChangedDLQ";
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -390,7 +390,7 @@ const startConsumerForUserForgotPassword = async () => {
   const DLQ_NAME = "forgotPasswordDLQ";
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -463,7 +463,7 @@ const startConsumerForContactusForm = async () => {
   const DLQ_NAME = "contactusDLQ";
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -543,7 +543,7 @@ const startConsumerForVehicleBooking = async () => {
   const DLQ_NAME = "userbookedvehicleDLQ";
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(BOOKINGEXCHANGE, "direct", { durable: true });
@@ -616,7 +616,7 @@ const startConsumerForVehicleBookingStatusUpdate = async () => {
   const DLQ_NAME = "userbookedvehiclestatusupdateDLQ";
 
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqp.connect(RABBITMQURL);
     const channel = await connection.createChannel();
 
     await channel.assertExchange(BOOKINGEXCHANGE, "direct", { durable: true });
