@@ -35,7 +35,7 @@ services:
       - RABBITMQ_DEFAULT_PASS=admin123
 
   consumer:
-    build: ./messageService
+    build: ./messageServices
     ports:
       - "8000:8000"
     environment:
