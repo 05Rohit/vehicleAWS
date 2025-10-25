@@ -12,7 +12,7 @@ const {
   userForgotPasswordEmail,
   userBookingConfirmationEmail,
   userBookingStatusUpdateEmail,
-} = require("../utils/mailTemplate");
+} = require("../utils/mailTemplate.jsx");
 
 // Env Variables
 const RABBITMQ_URL = process.env.RABBITMQURL;
