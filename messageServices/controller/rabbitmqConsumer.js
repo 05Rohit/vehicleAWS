@@ -18,757 +18,138 @@ const EXCHANGE = "emailExchange";
 const BOOKINGEXCHANGE = "bookingemailExchange";
 
 const MAX_RETRIES = 5;
-const BASE_DELAY_MS = 1000; // 1 second
+const BASE_DELAY_MS = 1000; // 1s
+const HEARTBEAT = 60;
+const RECONNECT_BASE_MS = 1000;
+const RECONNECT_MAX_MS = 30000;
 
-let connection = null;
-let channel = null;
+let sharedConnection = null;
+let starting = false;
+let startAttempt = 0;
 
-// Consumer for new vehicle added
-const startConsumerForNewVehicle = async () => {
-  const ROUTING_KEY = "task.newvehicleadded";
-  const QUEUE_NAME = "newvehicleadded";
-  const DLQ_NAME = "emailNewVehicleDLQ";
+async function ensureConnection(attempt = 0) {
+  if (sharedConnection) return sharedConnection;
+  if (!RABBITMQURL) throw new Error("RABBITMQURL not set");
 
   try {
-   connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
-
-    connection.on("close", () => {
-      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
-      setTimeout(startConsumerForNewVehicle, 5000);
+    sharedConnection = await amqp.connect(RABBITMQURL, { heartbeat: HEARTBEAT });
+    sharedConnection.on("close", (err) => {
+      console.error("🔁 RabbitMQ shared connection closed", err && err.message ? err.message : "");
+      sharedConnection = null;
+      // try to restart consumers with backoff
+      setTimeout(startAllConsumers, Math.min(RECONNECT_MAX_MS, RECONNECT_BASE_MS * Math.pow(2, startAttempt++)));
     });
-
-    connection.on("error", (err) => {
-      console.error("❌ RabbitMQ connection error:", err.message);
+    sharedConnection.on("error", (err) => {
+      console.error("❌ RabbitMQ shared connection error", err && err.message ? err.message : "");
     });
-     channel = await connection.createChannel();
+    console.log("✅ RabbitMQ shared connection established");
+    startAttempt = 0;
+    return sharedConnection;
+  } catch (err) {
+    const delay = Math.min(RECONNECT_MAX_MS, RECONNECT_BASE_MS * Math.pow(2, attempt));
+    console.error(`❌ RabbitMQ connect failed (attempt ${attempt + 1}). Retrying in ${delay}ms:`, err && err.message ? err.message : err);
+    await new Promise((r) => setTimeout(r, delay));
+    return ensureConnection(attempt + 1);
+  }
+}
 
-    await channel.assertExchange(EXCHANGE, "direct", { durable: true });
-    await channel.assertQueue(DLQ_NAME, { durable: true });
+async function startConsumer({ exchange, routingKey, queueName, dlqName, handler, exchangeType = "direct" }) {
+  try {
+    const conn = await ensureConnection();
+    const ch = await conn.createChannel();
 
-    await channel.assertQueue(QUEUE_NAME, {
+    await ch.assertExchange(exchange, exchangeType, { durable: true });
+    if (dlqName) await ch.assertQueue(dlqName, { durable: true });
+
+    await ch.assertQueue(queueName, {
       durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": "emailNewVehicleDLQ",
-      },
+      arguments: dlqName
+        ? {
+            "x-dead-letter-exchange": "",
+            "x-dead-letter-routing-key": dlqName,
+          }
+        : undefined,
     });
 
-    await channel.bindQueue(QUEUE_NAME, EXCHANGE, ROUTING_KEY);
+    await ch.bindQueue(queueName, exchange, routingKey);
 
-    channel.consume(
-      QUEUE_NAME,
+    ch.consume(
+      queueName,
       async (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          const headers = msg.properties.headers || {};
-          const retryCount = headers["x-retry-count"] || 0;
+        if (!msg) return;
+        const headers = msg.properties.headers || {};
+        const retryCount = Number(headers["x-retry-count"] || 0);
 
-          try {
-            const parsed = JSON.parse(messageContent);
-            const { subject, to, templateData } = parsed.payload;
-
-            // Send email using your template
-            await vehicleCreationEmail({ to, subject, templateData });
-
-            channel.ack(msg);
-          } catch (err) {
-            // console.error("❌ Error processing message:", err.message);
-            if (retryCount < MAX_RETRIES) {
-              const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
-
-              setTimeout(() => {
-                channel.sendToQueue(QUEUE_NAME, msg.content, {
-                  headers: { "x-retry-count": retryCount + 1 },
-                  persistent: true,
-                });
-                // console.log(
-                //   `🔁 Retrying message (${
-                //     retryCount + 1
-                //   }/${MAX_RETRIES}) after ${delay}ms`
-                // );
-              }, delay);
-
-              channel.ack(msg);
-            } else {
-              console.warn("🚨 Max retries reached. Sending to DLQ.");
-              channel.sendToQueue("emailNewVehicleDLQ", msg.content, {
+        try {
+          const parsed = JSON.parse(msg.content.toString());
+          const { payload } = parsed;
+          await handler(payload);
+          ch.ack(msg);
+        } catch (err) {
+          if (retryCount < MAX_RETRIES) {
+            const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
+            setTimeout(() => {
+              ch.sendToQueue(queueName, msg.content, {
+                headers: { "x-retry-count": retryCount + 1 },
                 persistent: true,
               });
-              channel.ack(msg);
+            }, delay);
+            ch.ack(msg);
+          } else {
+            if (dlqName) {
+              ch.sendToQueue(dlqName, msg.content, { persistent: true });
+              ch.ack(msg);
+            } else {
+              // no DLQ configured, nack without requeue
+              ch.nack(msg, false, false);
             }
           }
         }
       },
       { noAck: false }
     );
-  } catch (error) {
-    console.error("❌ Consumer error:", error.message);
+
+    console.log(`🟢 Consumer started: ${queueName} -> ${exchange}:${routingKey}`);
+  } catch (err) {
+    console.error(`❌ Failed to start consumer ${queueName}:`, err && err.message ? err.message : err);
+    // clear shared connection so ensureConnection will attempt reconnect
+    try { if (sharedConnection) await sharedConnection.close().catch(()=>{}); } catch(_) {}
+    sharedConnection = null;
+    setTimeout(() => startConsumer({ exchange, routingKey, queueName, dlqName, handler, exchangeType }), 5000);
   }
+}
+
+/* handlers that call mail templates - accept payload: { subject, to, templateData } */
+const emailHandlerFactory = (fn) => async (payload) => {
+  const { subject, to, templateData } = payload || {};
+  await fn({ to, subject, templateData });
 };
 
-const startConsumerForUpdateVehicle = async () => {
-  const ROUTING_KEY = "task.vehicleUpdated";
-  const QUEUE_NAME = "vehicleUpdated";
-  const DLQ_NAME = "vehicleUpdatedDLQ";
-
-  try {
-   connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
-
-    connection.on("close", () => {
-      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
-      setTimeout(startConsumerForUpdateVehicle, 5000);
-    });
-
-    connection.on("error", (err) => {
-      console.error("❌ RabbitMQ connection error:", err.message);
-    });
-     channel = await connection.createChannel();
-
-    await channel.assertExchange(EXCHANGE, "direct", { durable: true });
-    await channel.assertQueue(DLQ_NAME, { durable: true });
-
-    await channel.assertQueue(QUEUE_NAME, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": "vehicleUpdatedDLQ",
-      },
-    });
-
-    await channel.bindQueue(QUEUE_NAME, EXCHANGE, ROUTING_KEY);
-
-    channel.consume(
-      QUEUE_NAME,
-      async (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          const headers = msg.properties.headers || {};
-          const retryCount = headers["x-retry-count"] || 0;
-
-          try {
-            const parsed = JSON.parse(messageContent);
-            const { subject, to, templateData } = parsed.payload;
-
-            // Send email using your template
-            await vehicleUpdateEmail({ to, subject, templateData });
-
-            channel.ack(msg);
-          } catch (err) {
-            // console.error("❌ Error processing message:", err.message);
-            if (retryCount < MAX_RETRIES) {
-              const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
-
-              setTimeout(() => {
-                channel.sendToQueue(QUEUE_NAME, msg.content, {
-                  headers: { "x-retry-count": retryCount + 1 },
-                  persistent: true,
-                });
-                // console.log(
-                //   `🔁 Retrying message (${
-                //     retryCount + 1
-                //   }/${MAX_RETRIES}) after ${delay}ms`
-                // );
-              }, delay);
-
-              channel.ack(msg);
-            } else {
-              console.warn("🚨 Max retries reached. Sending to DLQ.");
-              channel.sendToQueue("vehicleUpdatedDLQ", msg.content, {
-                persistent: true,
-              });
-              channel.ack(msg);
-            }
-          }
-        }
-      },
-      { noAck: false }
-    );
-  } catch (error) {
-    console.error("❌ Consumer error:", error.message);
-  }
-};
-
-const startConsumerForDelteVehicle = async () => {
-  const ROUTING_KEY = "task.vehicleDeleted";
-  const QUEUE_NAME = "vehicleDeleted";
-  const DLQ_NAME = "vehicleDeletedDLQ";
-
-  try {
-   connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
-
-    connection.on("close", () => {
-      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
-      setTimeout(startConsumerForDelteVehicle, 5000);
-    });
-
-    connection.on("error", (err) => {
-      console.error("❌ RabbitMQ connection error:", err.message);
-    });
-     channel = await connection.createChannel();
-
-    await channel.assertExchange(EXCHANGE, "direct", { durable: true });
-    await channel.assertQueue(DLQ_NAME, { durable: true });
-
-    await channel.assertQueue(QUEUE_NAME, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": "vehicleDeletedDLQ",
-      },
-    });
-
-    await channel.bindQueue(QUEUE_NAME, EXCHANGE, ROUTING_KEY);
-
-    channel.consume(
-      QUEUE_NAME,
-      async (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          const headers = msg.properties.headers || {};
-          const retryCount = headers["x-retry-count"] || 0;
-
-          try {
-            const parsed = JSON.parse(messageContent);
-            const { subject, to, templateData } = parsed.payload;
-
-            // Send email using your template
-            await vehicleDeleteEmail({ to, subject, templateData });
-
-            channel.ack(msg);
-          } catch (err) {
-            // console.error("❌ Error processing message:", err.message);
-            if (retryCount < MAX_RETRIES) {
-              const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
-
-              setTimeout(() => {
-                channel.sendToQueue(QUEUE_NAME, msg.content, {
-                  headers: { "x-retry-count": retryCount + 1 },
-                  persistent: true,
-                });
-                // console.log(
-                //   `🔁 Retrying message (${
-                //     retryCount + 1
-                //   }/${MAX_RETRIES}) after ${delay}ms`
-                // );
-              }, delay);
-
-              channel.ack(msg);
-            } else {
-              console.warn("🚨 Max retries reached. Sending to DLQ.");
-              channel.sendToQueue("vehicleDeletedDLQ", msg.content, {
-                persistent: true,
-              });
-              channel.ack(msg);
-            }
-          }
-        }
-      },
-      { noAck: false }
-    );
-  } catch (error) {
-    console.error("❌ Consumer error:", error.message);
-  }
-};
-
-const startConsumerForUserCreation = async () => {
-  const ROUTING_KEY = "task.usercreated";
-  const QUEUE_NAME = "usercreated";
-  const DLQ_NAME = "usercreatedDLQ";
-
-  try {
-   connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
-
-    connection.on("close", () => {
-      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
-      setTimeout(startConsumerForUserCreation, 5000);
-    });
-
-    connection.on("error", (err) => {
-      console.error("❌ RabbitMQ connection error:", err.message);
-    });
-     channel = await connection.createChannel();
-
-    await channel.assertExchange(EXCHANGE, "direct", { durable: true });
-    await channel.assertQueue(DLQ_NAME, { durable: true });
-
-    await channel.assertQueue(QUEUE_NAME, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": "usercreatedDLQ",
-      },
-    });
-
-    await channel.bindQueue(QUEUE_NAME, EXCHANGE, ROUTING_KEY);
-
-    channel.consume(
-      QUEUE_NAME,
-      async (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          const headers = msg.properties.headers || {};
-          const retryCount = headers["x-retry-count"] || 0;
-
-          try {
-            const parsed = JSON.parse(messageContent);
-            const { subject, to, templateData } = parsed.payload;
-
-            // Send email using your template
-            await userCreationEmail({ to, subject, templateData });
-
-            channel.ack(msg);
-          } catch (err) {
-            // console.error("❌ Error processing message:", err.message);
-            if (retryCount < MAX_RETRIES) {
-              const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
-
-              setTimeout(() => {
-                channel.sendToQueue(QUEUE_NAME, msg.content, {
-                  headers: { "x-retry-count": retryCount + 1 },
-                  persistent: true,
-                });
-                // console.log(
-                //   `🔁 Retrying message (${
-                //     retryCount + 1
-                //   }/${MAX_RETRIES}) after ${delay}ms`
-                // );
-              }, delay);
-
-              channel.ack(msg);
-            } else {
-              console.warn("🚨 Max retries reached. Sending to DLQ.");
-              channel.sendToQueue("usercreatedDLQ", msg.content, {
-                persistent: true,
-              });
-              channel.ack(msg);
-            }
-          }
-        }
-      },
-      { noAck: false }
-    );
-  } catch (error) {
-    console.error("❌ Consumer error:", error.message);
-  }
-};
-const startConsumerForUserPasswordChange = async () => {
-  const ROUTING_KEY = "task.userPasswordChanged";
-  const QUEUE_NAME = "userPasswordChanged";
-  const DLQ_NAME = "userPasswordChangedDLQ";
-
-  try {
-   connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
-
-     channel = await connection.createChannel();
-
-    await channel.assertExchange(EXCHANGE, "direct", { durable: true });
-    await channel.assertQueue(DLQ_NAME, { durable: true });
-
-    await channel.assertQueue(QUEUE_NAME, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": "userPasswordChangedDLQ",
-      },
-    });
-
-    await channel.bindQueue(QUEUE_NAME, EXCHANGE, ROUTING_KEY);
-
-    channel.consume(
-      QUEUE_NAME,
-      async (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          const headers = msg.properties.headers || {};
-          const retryCount = headers["x-retry-count"] || 0;
-
-          try {
-            const parsed = JSON.parse(messageContent);
-            const { subject, to, templateData } = parsed.payload;
-
-            // Send email using your template
-            await userPasswordChangeEmail({ to, subject, templateData });
-
-            channel.ack(msg);
-          } catch (err) {
-            // console.error("❌ Error processing message:", err.message);
-            if (retryCount < MAX_RETRIES) {
-              const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
-
-              setTimeout(() => {
-                channel.sendToQueue(QUEUE_NAME, msg.content, {
-                  headers: { "x-retry-count": retryCount + 1 },
-                  persistent: true,
-                });
-                // console.log(
-                //   `🔁 Retrying message (${
-                //     retryCount + 1
-                //   }/${MAX_RETRIES}) after ${delay}ms`
-                // );
-              }, delay);
-
-              channel.ack(msg);
-            } else {
-              console.warn("🚨 Max retries reached. Sending to DLQ.");
-              channel.sendToQueue("userPasswordChangedDLQ", msg.content, {
-                persistent: true,
-              });
-              channel.ack(msg);
-            }
-          }
-        }
-      },
-      { noAck: false }
-    );
-  } catch (error) {
-    console.error("❌ Consumer error:", error.message);
-  }
-};
-const startConsumerForUserForgotPassword = async () => {
-  const ROUTING_KEY = "task.forgotPassword";
-  const QUEUE_NAME = "forgotPassword";
-  const DLQ_NAME = "forgotPasswordDLQ";
-
-  try {
-   connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
-
-    connection.on("close", () => {
-      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
-      setTimeout(startConsumerForUserForgotPassword, 5000);
-    });
-
-    connection.on("error", (err) => {
-      console.error("❌ RabbitMQ connection error:", err.message);
-    });
-     channel = await connection.createChannel();
-
-    await channel.assertExchange(EXCHANGE, "direct", { durable: true });
-    await channel.assertQueue(DLQ_NAME, { durable: true });
-
-    await channel.assertQueue(QUEUE_NAME, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": DLQ_NAME,
-      },
-    });
-
-    await channel.bindQueue(QUEUE_NAME, EXCHANGE, ROUTING_KEY);
-
-    channel.consume(
-      QUEUE_NAME,
-      async (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          const headers = msg.properties.headers || {};
-          const retryCount = headers["x-retry-count"] || 0;
-
-          try {
-            const parsed = JSON.parse(messageContent);
-            const { subject, to, templateData } = parsed.payload;
-
-            // Send email using your template
-            await userForgotPasswordEmail({ to, subject, templateData });
-
-            channel.ack(msg);
-          } catch (err) {
-            // console.error("❌ Error processing message:", err.message);
-            if (retryCount < MAX_RETRIES) {
-              const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
-
-              setTimeout(() => {
-                channel.sendToQueue(QUEUE_NAME, msg.content, {
-                  headers: { "x-retry-count": retryCount + 1 },
-                  persistent: true,
-                });
-                // console.log(
-                //   `🔁 Retrying message (${
-                //     retryCount + 1
-                //   }/${MAX_RETRIES}) after ${delay}ms`
-                // );
-              }, delay);
-
-              channel.ack(msg);
-            } else {
-              console.warn("🚨 Max retries reached. Sending to DLQ.");
-              channel.sendToQueue(DLQ_NAME, msg.content, {
-                persistent: true,
-              });
-              channel.ack(msg);
-            }
-          }
-        }
-      },
-      { noAck: false }
-    );
-  } catch (error) {
-    console.error("❌ Consumer error:", error.message);
-  }
-};
-
-const startConsumerForContactusForm = async () => {
-  const ROUTING_KEY = "task.contactus";
-  const QUEUE_NAME = "contactus";
-  const DLQ_NAME = "contactusDLQ";
-
-  try {
-   connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
-
-    connection.on("close", () => {
-      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
-      setTimeout(startConsumerForContactusForm, 5000);
-    });
-
-    connection.on("error", (err) => {
-      console.error("❌ RabbitMQ connection error:", err.message);
-    });
-     channel = await connection.createChannel();
-
-    await channel.assertExchange(EXCHANGE, "direct", { durable: true });
-    await channel.assertQueue(DLQ_NAME, { durable: true });
-
-    await channel.assertQueue(QUEUE_NAME, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": "contactusDLQ",
-      },
-    });
-
-    await channel.bindQueue(QUEUE_NAME, EXCHANGE, ROUTING_KEY);
-
-    channel.consume(
-      QUEUE_NAME,
-      async (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          const headers = msg.properties.headers || {};
-          const retryCount = headers["x-retry-count"] || 0;
-
-          try {
-            const parsed = JSON.parse(messageContent);
-            const { subject, to, templateData } = parsed.payload;
-
-            // console.log(
-            //   "Processing ContactUs message for:",
-            //   to,
-            //   subject,
-            //   templateData
-            // );
-
-            // Send email using your template
-            await userContactUsFormEmail({ to, subject, templateData });
-
-            channel.ack(msg);
-          } catch (err) {
-            // console.error("❌ Error processing message:", err.message);
-            if (retryCount < MAX_RETRIES) {
-              const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
-
-              setTimeout(() => {
-                channel.sendToQueue(QUEUE_NAME, msg.content, {
-                  headers: { "x-retry-count": retryCount + 1 },
-                  persistent: true,
-                });
-                // console.log(
-                //   `🔁 Retrying message (${
-                //     retryCount + 1
-                //   }/${MAX_RETRIES}) after ${delay}ms`
-                // );
-              }, delay);
-
-              channel.ack(msg);
-            } else {
-              console.warn("🚨 Max retries reached. Sending to DLQ.");
-              channel.sendToQueue("contactusDLQ", msg.content, {
-                persistent: true,
-              });
-              channel.ack(msg);
-            }
-          }
-        }
-      },
-      { noAck: false }
-    );
-  } catch (error) {
-    console.error("❌ Consumer error:", error.message);
-  }
-};
-
-const startConsumerForVehicleBooking = async () => {
-  const ROUTING_KEY = "bookingtask.userbookedvehicle";
-  const QUEUE_NAME = "userbookedvehicle";
-  const DLQ_NAME = "userbookedvehicleDLQ";
-
-  try {
-   connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
-
-    connection.on("close", () => {
-      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
-      setTimeout(startConsumerForVehicleBooking, 5000);
-    });
-
-    connection.on("error", (err) => {
-      console.error("❌ RabbitMQ connection error:", err.message);
-    });
-     channel = await connection.createChannel();
-
-    await channel.assertExchange(BOOKINGEXCHANGE, "direct", { durable: true });
-    await channel.assertQueue(DLQ_NAME, { durable: true });
-
-    await channel.assertQueue(QUEUE_NAME, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": DLQ_NAME,
-      },
-    });
-
-    await channel.bindQueue(QUEUE_NAME, BOOKINGEXCHANGE, ROUTING_KEY);
-
-    channel.consume(
-      QUEUE_NAME,
-      async (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          const headers = msg.properties.headers || {};
-          const retryCount = headers["x-retry-count"] || 0;
-
-          try {
-            const parsed = JSON.parse(messageContent);
-            const { subject, to, templateData } = parsed.payload;
-
-            // Send email using your template
-            await userBookingConfirmationEmail({ to, subject, templateData });
-
-            channel.ack(msg);
-          } catch (err) {
-            // console.error("❌ Error processing message:", err.message);
-            if (retryCount < MAX_RETRIES) {
-              const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
-
-              setTimeout(() => {
-                channel.sendToQueue(QUEUE_NAME, msg.content, {
-                  headers: { "x-retry-count": retryCount + 1 },
-                  persistent: true,
-                });
-                // console.log(
-                //   `🔁 Retrying message (${
-                //     retryCount + 1
-                //   }/${MAX_RETRIES}) after ${delay}ms`
-                // );
-              }, delay);
-
-              channel.ack(msg);
-            } else {
-              console.warn("🚨 Max retries reached. Sending to DLQ.");
-              channel.sendToQueue(DLQ_NAME, msg.content, {
-                persistent: true,
-              });
-              channel.ack(msg);
-            }
-          }
-        }
-      },
-      { noAck: false }
-    );
-  } catch (error) {
-    console.error("❌ Consumer error:", error.message);
-  }
-};
-
-const startConsumerForVehicleBookingStatusUpdate = async () => {
-  const ROUTING_KEY = "bookingtask.userbookedvehiclestatusupdate";
-  const QUEUE_NAME = "userbookedvehiclestatusupdate";
-  const DLQ_NAME = "userbookedvehiclestatusupdateDLQ";
-
-  try {
-   connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
-
-    connection.on("close", () => {
-      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
-      setTimeout(startConsumerForVehicleBookingStatusUpdate, 5000);
-    });
-
-    connection.on("error", (err) => {
-      console.error("❌ RabbitMQ connection error:", err.message);
-    });
-     channel = await connection.createChannel();
-
-    await channel.assertExchange(BOOKINGEXCHANGE, "direct", { durable: true });
-    await channel.assertQueue(DLQ_NAME, { durable: true });
-
-    await channel.assertQueue(QUEUE_NAME, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": DLQ_NAME,
-      },
-    });
-
-    await channel.bindQueue(QUEUE_NAME, BOOKINGEXCHANGE, ROUTING_KEY);
-
-    channel.consume(
-      QUEUE_NAME,
-      async (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          const headers = msg.properties.headers || {};
-          const retryCount = headers["x-retry-count"] || 0;
-
-          try {
-            const parsed = JSON.parse(messageContent);
-            const { subject, to, templateData } = parsed.payload;
-
-            //
-
-            // Send email using your template
-            await userBookingStatusUpdateEmail({ to, subject, templateData });
-
-            channel.ack(msg);
-          } catch (err) {
-            // console.error("❌ Error processing message:", err.message);
-            if (retryCount < MAX_RETRIES) {
-              const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
-
-              setTimeout(() => {
-                channel.sendToQueue(QUEUE_NAME, msg.content, {
-                  headers: { "x-retry-count": retryCount + 1 },
-                  persistent: true,
-                });
-                // console.log(
-                //   `🔁 Retrying message (${
-                //     retryCount + 1
-                //   }/${MAX_RETRIES}) after ${delay}ms`
-                // );
-              }, delay);
-
-              channel.ack(msg);
-            } else {
-              console.warn("🚨 Max retries reached. Sending to DLQ.");
-              channel.sendToQueue(DLQ_NAME, msg.content, {
-                persistent: true,
-              });
-              channel.ack(msg);
-            }
-          }
-        }
-      },
-      { noAck: false }
-    );
-  } catch (error) {
-    console.error("❌ Consumer error:", error.message);
-  }
-};
-
-startConsumerForNewVehicle();
-startConsumerForUserCreation();
-startConsumerForUserPasswordChange();
-startConsumerForUpdateVehicle();
-startConsumerForDelteVehicle();
-startConsumerForContactusForm();
-startConsumerForUserForgotPassword();
-startConsumerForVehicleBooking();
-startConsumerForVehicleBookingStatusUpdate();
-
-module.exports = { startConsumerForNewVehicle };
+function startAllConsumers() {
+  if (starting) return;
+  starting = true;
+
+  const consumers = [
+    { exchange: EXCHANGE, routingKey: "task.newvehicleadded", queueName: "newvehicleadded", dlqName: "emailNewVehicleDLQ", handler: emailHandlerFactory(vehicleCreationEmail) },
+    { exchange: EXCHANGE, routingKey: "task.vehicleUpdated", queueName: "vehicleUpdated", dlqName: "vehicleUpdatedDLQ", handler: emailHandlerFactory(vehicleUpdateEmail) },
+    { exchange: EXCHANGE, routingKey: "task.vehicleDeleted", queueName: "vehicleDeleted", dlqName: "vehicleDeletedDLQ", handler: emailHandlerFactory(vehicleDeleteEmail) },
+    { exchange: EXCHANGE, routingKey: "task.usercreated", queueName: "usercreated", dlqName: "usercreatedDLQ", handler: emailHandlerFactory(userCreationEmail) },
+    { exchange: EXCHANGE, routingKey: "task.userPasswordChanged", queueName: "userPasswordChanged", dlqName: "userPasswordChangedDLQ", handler: emailHandlerFactory(userPasswordChangeEmail) },
+    { exchange: EXCHANGE, routingKey: "task.forgotPassword", queueName: "forgotPassword", dlqName: "forgotPasswordDLQ", handler: emailHandlerFactory(userForgotPasswordEmail) },
+    { exchange: EXCHANGE, routingKey: "task.contactus", queueName: "contactus", dlqName: "contactusDLQ", handler: emailHandlerFactory(userContactUsFormEmail) },
+
+    // booking exchange consumers
+    { exchange: BOOKINGEXCHANGE, routingKey: "bookingtask.userbookedvehicle", queueName: "userbookedvehicle", dlqName: "userbookedvehicleDLQ", handler: emailHandlerFactory(userBookingConfirmationEmail), exchangeType: "direct" },
+    { exchange: BOOKINGEXCHANGE, routingKey: "bookingtask.userbookedvehiclestatusupdate", queueName: "userbookedvehiclestatusupdate", dlqName: "userbookedvehiclestatusupdateDLQ", handler: emailHandlerFactory(userBookingStatusUpdateEmail), exchangeType: "direct" },
+  ];
+
+  // start each consumer (creates channel per consumer)
+  consumers.forEach((cfg) => startConsumer(cfg));
+
+  starting = false;
+}
+
+// initialize
+startAllConsumers();
+
+module.exports = { startAllConsumers };
