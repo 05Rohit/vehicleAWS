@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 
 const SocketContext = createContext();
 
-const SOCKET_URL = "http://localhost:8000"; // 🔁 replace with your backend URL
+const SOCKET_URL = "https://vehicleaws-messagebroker.onrender.com/"; // 🔁 replace with your backend URL
 
 export const SocketProvider = ({ userData, children }) => {
   const [socket, setSocket] = useState(null);

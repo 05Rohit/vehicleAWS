@@ -16,7 +16,7 @@ services:
       - "5000:5000"
     environment:
       - PORT=5000
-      - RABBITMQURL=amqp://admin:admin123@http://localhost:5672
+      - RABBITMQURL=amqp://admin:admin123@rabbitmq:5672
       - DLQ_NAME=emailDLQ
       - MAIL_HOST=smtp.gmail.com
       - MAIL_PORT=587
@@ -33,3 +33,21 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=admin123
+
+  consumer:
+    build: ./messageServices
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - RABBITMQURL=amqp://admin:admin123@rabbitmq:5672
+      - DLQ_NAME=emailDLQ
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - SENDER_MAIL_ID=25rohitkumar98@gmail.com
+      - MAIL_PASS=glearzefyijihhql
+      - BACKEND_SERVICE_URL=http://backend:5000/createnotification
+    depends_on:
+      - rabbitmq
+      - backend
+
