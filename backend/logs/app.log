@@ -556,3 +556,114 @@ error:- [] No booking found for this user Error: No booking found for this user
 error:- [] No booking found for this user Error: No booking found for this user
     at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:340:17
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-25 19:06:32 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:42:55 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:43:18 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:44:41 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:44:47 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:46:42 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:48:56 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:50:08 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:50:52 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:51:52 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:52:58 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 21:55:23 
+error:- [] No booking found for this user Error: No booking found for this user
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:347:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-25 21:56:00 
+error:- [] No booking found for this user Error: No booking found for this user
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:347:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-25 21:56:54 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 22:01:25 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 22:01:39 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 22:01:55 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 22:02:19 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 22:02:47 
+error:- [] BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required. ValidationError: BookingDetail validation failed: vehicleDetails.0.uniqueVehicleId: Path `uniqueVehicleId` is required.
+    at Document.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3334:32)
+    at Subdocument.invalidate (C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\document.js:3095:17
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11) 2025-10-25 22:06:33 
+error:- [] No available vehicle in this group for the selected dates Error: No available vehicle in this group for the selected dates
+    at C:\Users\Lenovo\Desktop\Project\kya kru\vehicleAWS\backend\Controller\vehicleBookingController.js:85:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) 2025-10-25 22:16:05 

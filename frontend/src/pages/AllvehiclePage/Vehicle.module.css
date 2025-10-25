@@ -2,7 +2,7 @@
 
 .vehicle_rental_showcase {
   min-height: 100vh;
-background-color: white;
+  background-color: white;
   font-family: "Inter", sans-serif;
 }
 
@@ -43,9 +43,10 @@ background-color: white;
   height: max-content;
   overflow: hidden;
   border-radius: 0.5rem;
-  background: linear-gradient(to bottom right, #e5e7eb, #f3f4f6);
-
+  background: transparent;
   margin: auto;
+  width: 265px;
+  height: 180px;
 }
 .vehicle_image_container img {
   width: 100%;
@@ -60,26 +61,27 @@ background-color: white;
   position: absolute;
   top: 0rem;
   left: 0rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(245, 218, 178, 0.7);
   backdrop-filter: blur(5px);
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-weight: bold;
-  color: #059669;
+  color: #005f3f;
 }
 .vehicle_name_overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-  padding: 1rem;
-  color: white;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.637));
+  padding: 0.2rem 1rem;
+  color: rgb(247, 247, 247);
   font-size: 1.5rem;
   font-weight: bold;
+  width: 100%;
 }
 
-.vehicle_content{
+.vehicle_content {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -94,7 +96,6 @@ background-color: white;
   padding: 0.1rem 0.5rem;
   border-radius: 0.5rem;
   border: 1px solid #fb923c;
-
 }
 .date_range p {
   font-size: 0.8rem;
@@ -114,7 +115,7 @@ background-color: white;
   font-weight: 500;
   color: #374151;
 }
-.icon{
+.icon {
   width: 1.2rem;
   height: 1.2rem;
 }
@@ -125,7 +126,7 @@ background-color: white;
 }
 
 .pricing_btn {
-  padding:0.2rem 0.5rem;
+  padding: 0.2rem 0.5rem;
   border-radius: 0.4rem;
   border: 2px solid #e5e7eb;
   background: white;

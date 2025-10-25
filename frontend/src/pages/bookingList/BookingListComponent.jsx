@@ -90,6 +90,8 @@ const BookingListComponent = ({ bookingList, fetchBookingsDetails }) => {
       ? bookingList
       : bookingList.filter((v) => v.bookingStatus === filter);
 
+  // console.log("Filtered Bookings:", bookingList);
+
   return (
     <>
       {isLoading ? (
@@ -139,13 +141,14 @@ const BookingListComponent = ({ bookingList, fetchBookingsDetails }) => {
 
                   <div className={styles.bookingBody}>
                     <div className={styles.bookingBody_box}>
-                      {filteredBookings.filePath && filteredBookings.filePath.length > 0 && (
-                        <img
-                          src={`${Server_API}${filteredBookings.filePath[0]}`} // Prepend base URL to filePath
-                          alt="VehicleImage"
-                          className={filteredBookings.bikeImage}
-                        />
-                      )}
+                      <div className={styles.image}>
+                        {filteredBookings[0].filePath && (
+                          <img
+                            src={`${Server_API}${filteredBookings[0].filePath}`} // Prepend base URL to filePath
+                            alt="VehicleImage"
+                          />
+                        )}
+                      </div>
 
                       <div className={styles.details}>
                         <p>

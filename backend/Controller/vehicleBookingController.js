@@ -53,6 +53,7 @@ exports.createBookingDetails = catchAsync(async (req, res, next) => {
   }
 
   const vehicle = await vehicleModel.findOne({ uniqueGroupId });
+
   if (!vehicle) {
     return next(new AppError("No vehicle group found with this ID", 400));
   }
@@ -158,25 +159,25 @@ exports.createBookingDetails = catchAsync(async (req, res, next) => {
       const title = "Booking successful";
       const rolename = "user";
 
-      await sendNotification(userId, rolename, message, title, type);
+      // await sendNotification(userId, rolename, message, title, type);
 
-      await sendMailToQueue({
-        subject: "Welcome to Bike Rider",
-        to: userDetails.email,
-        EXCHANGE: "bookingemailExchange",
-        ROUTING_KEY: "bookingtask.userbookedvehicle",
-        templateData: {
-          name: userDetails.name,
-          email: userDetails.email,
-          vehicleName: vehicle.name,
-          vehicleModel: vehicle.model,
-          vehicleType: vehicle.vehicleType,
-          location: selectedVehicle.location,
-          vehicleNumber: selectedVehicle.vehicleNumber,
-          startDate: formattedStartDate,
-          endDate: formattedEndDate,
-        },
-      });
+      // await sendMailToQueue({
+      //   subject: "Welcome to Bike Rider",
+      //   to: userDetails.email,
+      //   EXCHANGE: "bookingemailExchange",
+      //   ROUTING_KEY: "bookingtask.userbookedvehicle",
+      //   templateData: {
+      //     name: userDetails.name,
+      //     email: userDetails.email,
+      //     vehicleName: vehicle.name,
+      //     vehicleModel: vehicle.model,
+      //     vehicleType: vehicle.vehicleType,
+      //     location: selectedVehicle.location,
+      //     vehicleNumber: selectedVehicle.vehicleNumber,
+      //     startDate: formattedStartDate,
+      //     endDate: formattedEndDate,
+      //   },
+      // });
 
       await existingBooking.save();
 
@@ -225,25 +226,25 @@ exports.createBookingDetails = catchAsync(async (req, res, next) => {
   const title = "Booking successful";
   const rolename = "user";
 
-  await sendNotification(userId, rolename, message, title, type);
+  // await sendNotification(userId, rolename, message, title, type);
 
-  await sendMailToQueue({
-    subject: "Welcome to Bike Rider",
-    to: userDetails.email,
-    EXCHANGE: "bookingemailExchange",
-    ROUTING_KEY: "bookingtask.userbookedvehicle",
-    templateData: {
-      name: userDetails.name,
-      email: userDetails.email,
-      vehicleName: vehicle.name,
-      vehicleModel: vehicle.model,
-      vehicleType: vehicle.vehicleType,
-      location: selectedVehicle.location,
-      vehicleNumber: selectedVehicle.vehicleNumber,
-      startDate: formattedStartDate,
-      endDate: formattedEndDate,
-    },
-  });
+  // await sendMailToQueue({
+  //   subject: "Welcome to Bike Rider",
+  //   to: userDetails.email,
+  //   EXCHANGE: "bookingemailExchange",
+  //   ROUTING_KEY: "bookingtask.userbookedvehicle",
+  //   templateData: {
+  //     name: userDetails.name,
+  //     email: userDetails.email,
+  //     vehicleName: vehicle.name,
+  //     vehicleModel: vehicle.model,
+  //     vehicleType: vehicle.vehicleType,
+  //     location: selectedVehicle.location,
+  //     vehicleNumber: selectedVehicle.vehicleNumber,
+  //     startDate: formattedStartDate,
+  //     endDate: formattedEndDate,
+  //   },
+  // });
 
   return res.status(200).json({
     message: "Booking confirmed and vehicle booking period updated",

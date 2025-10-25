@@ -16,9 +16,7 @@ const BookingList = () => {
       setAllBookingDetails(response.data.data || []);
     } catch (error) {
       handleShowToast("danger", "Failed to fetch details");
-    } finally {
-      setAllBookingDetails([]);
-    }
+    } 
   };
 
   useEffect(() => {

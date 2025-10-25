@@ -8,3 +8,10 @@ router.get('/getBookingdetails',verifyToken,bookingController.getBookingDetails)
 router.patch('/updateBookingDetails',verifyToken,bookingController.updateBookingDetails)
 
 module.exports=router
+
+
+
+
+
+
+
