@@ -24,6 +24,7 @@ import LoginPage from "./../loginPage/LoginPage";
 import SignInPage from "./../signUpPage/SignInPage";
 import ChnagePassword from "./../forgotPassword/ChnagePassword";
 import ResetPasswordPage from "./../forgotPassword/ResetPasswordPage";
+import NotFoundPage from "../../errorPage/NotFoundPage";
 
 const Layout = () => {
   const { handleShowToast } = useToast();
@@ -138,7 +139,7 @@ const Layout = () => {
                     path="/addvehicle"
                     element={
                       // userType === "admin" ? (
-                        <AddVehicleDetails />
+                      <AddVehicleDetails />
                       // ) : (
                       //   <HomePage userData={data} />
                       // )
@@ -166,12 +167,12 @@ const Layout = () => {
                     path="/contactus"
                     element={<ContactUsForm userData={data} />}
                   />
-        
+
                   <Route
                     path="/vehicleManagement"
                     element={
                       // userType === "admin" ? (
-                        <AdminVehicleManagement userData={data} />
+                      <AdminVehicleManagement userData={data} />
                       // ) : (
                       //   <HomePage userData={data} />
                       // )
@@ -192,6 +193,7 @@ const Layout = () => {
                     path="/reset-password"
                     element={<ResetPasswordPage />}
                   />
+                  <Route path="*" element={<NotFoundPage userData={data} />} />
                 </Routes>
               </div>
             </>

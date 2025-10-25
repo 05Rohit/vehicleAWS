@@ -3,7 +3,7 @@ const Transporter = require("./mailService.js");
 const senderMail = process.env.SENDER_MAIL_ID;
 async function vehicleCreationEmail({ to, subject, templateData }) {
   await Transporter.transporter.sendMail({
-    from: { name: "BIKE RIDER", address: senderMail },
+    from: { name: "GO GEAR", address: senderMail },
     to,
     subject,
     html: `
@@ -12,7 +12,7 @@ async function vehicleCreationEmail({ to, subject, templateData }) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Vehicle Added - SmarTE Desk</title>
+  <title>New Vehicle Added - GO GEAR</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -63,7 +63,7 @@ async function vehicleCreationEmail({ to, subject, templateData }) {
 </head>
 <body>
   <div class="container">
-    <h2>Welcome to SmarTE Desk!</h2>
+    <h2>Welcome to GO GEAR!</h2>
     <p class="greeting">Hello <b>${templateData.userName}</b>,</p>
     <p>We are excited to inform you that your vehicle has been successfully added to our platform. Here are the details:</p>
     <ul class="details">
@@ -74,10 +74,10 @@ async function vehicleCreationEmail({ to, subject, templateData }) {
       <li><b>Vehicle ID:</b> ${templateData.vehicleId}</li>
     </ul>
     <p>If you have any questions or need assistance, feel free to contact our support team at <span class="support">${senderMail}</span>.</p>
-    <p>Thank you for choosing SmarTE Desk!</p>
+    <p>Thank you for choosing GO GEAR!</p>
     <div class="footer">
       Regards,<br>
-      <b>Team SmarTE Desk</b>
+      <b>Team GO GEAR</b>
     </div>
   </div>
 </body>
@@ -88,7 +88,7 @@ async function vehicleCreationEmail({ to, subject, templateData }) {
 
 async function vehicleUpdateEmail({ to, subject, templateData }) {
   await Transporter.transporter.sendMail({
-    from: { name: "BIKE RIDER", address: senderMail },
+    from: { name: "GO GEAR", address: senderMail },
     to,
     subject,
     html: `
@@ -97,7 +97,7 @@ async function vehicleUpdateEmail({ to, subject, templateData }) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vehicle Updated - SmarTE Desk</title>
+  <title>Vehicle Updated - GO GEAR</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -150,7 +150,7 @@ async function vehicleUpdateEmail({ to, subject, templateData }) {
   <div class="container">
     <h2>Vehicle Details Updated!</h2>
     <p class="greeting">Hello <b>${templateData.userName}</b>,</p>
-    <p>Your vehicle information has been updated on SmarTE Desk. Here are the latest details:</p>
+    <p>Your vehicle information has been updated on GO GEAR. Here are the latest details:</p>
     <ul class="details">
       <li><b>Vehicle Name:</b> ${templateData.vehicleName}</li>
       <li><b>Vehicle Number:</b> ${templateData.vehicleNumber}</li>
@@ -159,10 +159,10 @@ async function vehicleUpdateEmail({ to, subject, templateData }) {
       <li><b>Vehicle ID:</b> ${templateData.vehicleId}</li>
     </ul>
     <p>If you have any questions or need assistance, feel free to contact our support team at <span class="support">${senderMail}</span>.</p>
-    <p>Thank you for using SmarTE Desk!</p>
+    <p>Thank you for using GO GEAR!</p>
     <div class="footer">
       Regards,<br>
-      <b>Team SmarTE Desk</b>
+      <b>Team GO GEAR</b>
     </div>
   </div>
 </body>
@@ -173,7 +173,7 @@ async function vehicleUpdateEmail({ to, subject, templateData }) {
 
 async function vehicleDeleteEmail({ to, subject, templateData }) {
   await Transporter.transporter.sendMail({
-    from: { name: "BIKE RIDER", address: senderMail },
+    from: { name: "GO GEAR", address: senderMail },
     to,
     subject,
     html: `
@@ -182,7 +182,7 @@ async function vehicleDeleteEmail({ to, subject, templateData }) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vehicle Deleted - SmarTE Desk</title>
+  <title>Vehicle Deleted - GO GEAR</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -235,7 +235,7 @@ async function vehicleDeleteEmail({ to, subject, templateData }) {
   <div class="container">
     <h2>Vehicle Deleted</h2>
     <p class="greeting">Hello <b>${templateData.userName}</b>,</p>
-    <p>We want to inform you that the following vehicle has been deleted from your account on SmarTE Desk:</p>
+    <p>We want to inform you that the following vehicle has been deleted from your account on GO GEAR:</p>
     <ul class="details">
       <li><b>Vehicle Name:</b> ${templateData.vehicleName}</li>
       <li><b>Vehicle Number:</b> ${templateData.vehicleNumber}</li>
@@ -246,7 +246,7 @@ async function vehicleDeleteEmail({ to, subject, templateData }) {
     <p>If you did not request this deletion or have any questions, please contact our support team at <span class="support">${senderMail}</span> immediately.</p>
     <div class="footer">
       Regards,<br>
-      <b>Team SmarTE Desk</b>
+      <b>Team GO GEAR</b>
     </div>
   </div>
 </body>
@@ -258,7 +258,7 @@ async function vehicleDeleteEmail({ to, subject, templateData }) {
 async function userCreationEmail({ to, subject, templateData }) {
   // ...existing code...
   await Transporter.transporter.sendMail({
-    from: { name: "BIKE RIDER", address: senderMail },
+    from: { name: "GO GEAR", address: senderMail },
     to,
     subject,
     html: `
@@ -341,7 +341,7 @@ async function userCreationEmail({ to, subject, templateData }) {
 async function userPasswordChangeEmail({ to, subject, templateData }) {
   // ...existing code...
   await Transporter.transporter.sendMail({
-    from: { name: "BIKE RIDER", address: senderMail },
+    from: { name: "GO GEAR", address: senderMail },
     to,
     subject,
     html: `
@@ -422,7 +422,7 @@ async function userPasswordChangeEmail({ to, subject, templateData }) {
 
 async function userContactUsFormEmail({ to, subject, templateData }) {
   await Transporter.transporter.sendMail({
-    from: { name: "BIKE RIDER", address: senderMail },
+    from: { name: "GO GEAR", address: senderMail },
     to: senderMail,
     to,
     subject,
@@ -507,7 +507,7 @@ async function userContactUsFormEmail({ to, subject, templateData }) {
 }
 async function userForgotPasswordEmail({ to, subject, templateData }) {
   await Transporter.transporter.sendMail({
-    from: { name: "BIKE RIDER", address: senderMail },
+    from: { name: "GO GEAR", address: senderMail },
     to: senderMail,
     to,
     subject,
@@ -536,7 +536,7 @@ async function userForgotPasswordEmail({ to, subject, templateData }) {
 
 async function userBookingConfirmationEmail({ to, subject, templateData }) {
   await Transporter.transporter.sendMail({
-    from: { name: "BIKE RIDER", address: senderMail },
+    from: { name: "GO GEAR", address: senderMail },
     to,
     subject,
     html: `
@@ -584,7 +584,7 @@ async function userBookingConfirmationEmail({ to, subject, templateData }) {
 
 async function userBookingStatusUpdateEmail({ to, subject, templateData }) {
   await Transporter.transporter.sendMail({
-    from: { name: "BIKE RIDER", address: senderMail },
+    from: { name: "GO GEAR", address: senderMail },
     to,
     subject,
     html: `

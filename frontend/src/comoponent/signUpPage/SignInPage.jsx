@@ -75,6 +75,10 @@ const SignInPage = () => {
         userType: "",
       });
       handleShowToast("success", "Account Successfully created");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
     } catch (error) {
       // console.error("Error:", );
       const ErrorMsg = error?.response?.data?.error;

@@ -1,15 +1,31 @@
+require("dotenv").config();
 const amqp = require("amqplib");
 const axios = require("axios");
-require("dotenv").config();
 
 const BACKEND_SERVICE_URL = process.env.BACKEND_SERVICE_URL;
 const RABBITMQURL = process.env.RABBITMQURL;
 const MAX_RETRIES = 5;
 
+let connection = null;
+let channel = null;
+
 async function notificationConsumer(rolename, io) {
+  if (!rolename || !io) {
+    throw new Error("rolename and io must be provided");
+  }
   try {
     // 1️⃣ Connect to RabbitMQ
     const connection = await amqp.connect(RABBITMQURL);
+
+    connection.on("close", () => {
+      console.error("🔁 RabbitMQ connection closed. Reconnecting in 5s...");
+      setTimeout(() => notificationConsumer(rolename, io), 5000);
+    });
+
+    connection.on("error", (err) => {
+      console.error("❌ RabbitMQ connection error:", err.message);
+    });
+
     const channel = await connection.createChannel();
 
     const exchange = "notifications_topic";
@@ -57,6 +73,7 @@ async function notificationConsumer(rolename, io) {
     );
   } catch (err) {
     console.error("❌ RabbitMQ Connection Error:", err.message);
+    setTimeout(() => notificationConsumer(rolename, io), 5000);
   }
 }
 

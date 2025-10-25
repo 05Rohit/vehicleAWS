@@ -20,6 +20,9 @@ const BOOKINGEXCHANGE = "bookingemailExchange";
 const MAX_RETRIES = 5;
 const BASE_DELAY_MS = 1000; // 1 second
 
+let connection = null;
+let channel = null;
+
 // Consumer for new vehicle added
 const startConsumerForNewVehicle = async () => {
   const ROUTING_KEY = "task.newvehicleadded";
@@ -28,6 +31,14 @@ const startConsumerForNewVehicle = async () => {
 
   try {
     const connection = await amqp.connect(RABBITMQURL);
+    connection.on("close", () => {
+      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
+      setTimeout(startConsumerForNewVehicle, 5000);
+    });
+
+    connection.on("error", (err) => {
+      console.error("❌ RabbitMQ connection error:", err.message);
+    });
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -101,6 +112,14 @@ const startConsumerForUpdateVehicle = async () => {
 
   try {
     const connection = await amqp.connect(RABBITMQURL);
+    connection.on("close", () => {
+      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
+      setTimeout(startConsumerForUpdateVehicle, 5000);
+    });
+
+    connection.on("error", (err) => {
+      console.error("❌ RabbitMQ connection error:", err.message);
+    });
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -174,6 +193,14 @@ const startConsumerForDelteVehicle = async () => {
 
   try {
     const connection = await amqp.connect(RABBITMQURL);
+    connection.on("close", () => {
+      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
+      setTimeout(startConsumerForDelteVehicle, 5000);
+    });
+
+    connection.on("error", (err) => {
+      console.error("❌ RabbitMQ connection error:", err.message);
+    });
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -247,6 +274,14 @@ const startConsumerForUserCreation = async () => {
 
   try {
     const connection = await amqp.connect(RABBITMQURL);
+    connection.on("close", () => {
+      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
+      setTimeout(startConsumerForUserCreation, 5000);
+    });
+
+    connection.on("error", (err) => {
+      console.error("❌ RabbitMQ connection error:", err.message);
+    });
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -391,6 +426,14 @@ const startConsumerForUserForgotPassword = async () => {
 
   try {
     const connection = await amqp.connect(RABBITMQURL);
+    connection.on("close", () => {
+      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
+      setTimeout(startConsumerForUserForgotPassword, 5000);
+    });
+
+    connection.on("error", (err) => {
+      console.error("❌ RabbitMQ connection error:", err.message);
+    });
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -464,6 +507,14 @@ const startConsumerForContactusForm = async () => {
 
   try {
     const connection = await amqp.connect(RABBITMQURL);
+    connection.on("close", () => {
+      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
+      setTimeout(startConsumerForContactusForm, 5000);
+    });
+
+    connection.on("error", (err) => {
+      console.error("❌ RabbitMQ connection error:", err.message);
+    });
     const channel = await connection.createChannel();
 
     await channel.assertExchange(EXCHANGE, "direct", { durable: true });
@@ -544,6 +595,14 @@ const startConsumerForVehicleBooking = async () => {
 
   try {
     const connection = await amqp.connect(RABBITMQURL);
+    connection.on("close", () => {
+      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
+      setTimeout(startConsumerForVehicleBooking, 5000);
+    });
+
+    connection.on("error", (err) => {
+      console.error("❌ RabbitMQ connection error:", err.message);
+    });
     const channel = await connection.createChannel();
 
     await channel.assertExchange(BOOKINGEXCHANGE, "direct", { durable: true });
@@ -617,6 +676,14 @@ const startConsumerForVehicleBookingStatusUpdate = async () => {
 
   try {
     const connection = await amqp.connect(RABBITMQURL);
+    connection.on("close", () => {
+      console.error("🔁 RabbitMQ connection closed. Reconnecting...");
+      setTimeout(startConsumerForVehicleBookingStatusUpdate, 5000);
+    });
+
+    connection.on("error", (err) => {
+      console.error("❌ RabbitMQ connection error:", err.message);
+    });
     const channel = await connection.createChannel();
 
     await channel.assertExchange(BOOKINGEXCHANGE, "direct", { durable: true });
