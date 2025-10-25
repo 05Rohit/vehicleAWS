@@ -3,7 +3,8 @@ const amqp = require("amqplib");
 const axios = require("axios");
 
 const BACKEND_SERVICE_URL = process.env.BACKEND_SERVICE_URL;
-const RABBITMQURL = process.env.RABBITMQURL;
+const RABBITMQURL = process.env.RABBITMQURL + "?heartbeat=60";
+
 const MAX_RETRIES = 5;
 
 let connection = null;
@@ -15,7 +16,7 @@ async function notificationConsumer(rolename, io) {
   }
   try {
     // 1️⃣ Connect to RabbitMQ
-    const connection = await amqp.connect(RABBITMQURL);
+    connection = await amqp.connect(RABBITMQURL);
 
     connection.on("close", () => {
       console.error("🔁 RabbitMQ connection closed. Reconnecting in 5s...");
@@ -26,7 +27,7 @@ async function notificationConsumer(rolename, io) {
       console.error("❌ RabbitMQ connection error:", err.message);
     });
 
-    const channel = await connection.createChannel();
+    channel = await connection.createChannel();
 
     const exchange = "notifications_topic";
     await channel.assertExchange(exchange, "topic", { durable: true });

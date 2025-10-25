@@ -103,14 +103,6 @@ vehicleDetailSchema.pre("validate", function (next) {
   }
   next();
 });
-specificVehicleSchema.pre("validate", function (next) {
-  if (this.isNew) {
-    const currentDate = moment().format("YYYYMM");
-    const currentTime = moment().format("HHmmss");
-    this.uniqueVehicleId = `${currentDate}${currentTime}`;
-  }
-  next();
-});
 
 // Pre-save hook for timestamps
 vehicleDetailSchema.pre("save", function (next) {

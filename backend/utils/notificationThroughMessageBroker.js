@@ -5,7 +5,7 @@ const RABBITMQURL = process.env.RABBITMQURL;
 
 async function sendNotification(userId, rolename, message, title, type) {
   try {
-    const connection = await amqp.connect(RABBITMQURL);
+const connection = await amqp.connect(RABBITMQURL, { heartbeat: 60 });
     const channel = await connection.createChannel();
 
 
