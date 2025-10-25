@@ -4,6 +4,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const http = require("http");
 const { Server } = require("socket.io");
+const path = require('path');
+
 
 // DB Connection
 require("./DatabaseConnection/dataBaseConnection");
@@ -25,7 +27,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND,      
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"," PATCH"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"],
   })
 );
 
@@ -38,14 +40,14 @@ app.use(express.urlencoded({ extended: true }));
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND,
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "OPTIONS"],
     credentials: true,
   },
 });
 app.set("io", io);
 
 // ✅ Static file serving (for uploaded files)
-app.use("/uploads", express.static("uploads"));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ✅ API Routes
 app.use(userRoutes);
@@ -57,34 +59,6 @@ app.use(require("./router/notificationRoutes"));
 app.get("/", (req, res) => {
   res.send("Hello, RentalBike Backend 🚴");
 });
-
-// ✅ Socket.IO Events
-// io.on("connection", (socket) => {
-//   console.log(`🔌 Socket connected: ${socket.id}`);
-
-//   socket.on("joinRoom", (roomId) => {
-//     if (roomId) {
-//       socket.join(roomId.toString());
-//       console.log(`📥 User ${socket.id} joined room ${roomId}`);
-//     }
-//   });
-
-//   socket.on("offer", ({ offer, roomId }) => {
-//     socket.to(roomId).emit("offer", offer);
-//   });
-
-//   socket.on("answer", ({ answer, roomId }) => {
-//     socket.to(roomId).emit("answer", answer);
-//   });
-
-//   socket.on("candidate", ({ candidate, roomId }) => {
-//     socket.to(roomId).emit("candidate", candidate);
-//   });
-
-//   socket.on("disconnect", () => {
-//     console.log(`❌ Socket disconnected: ${socket.id}`);
-//   });
-// });
 
 // ✅ Global Error Handler
 app.use(errorHandlerMiddleware);
