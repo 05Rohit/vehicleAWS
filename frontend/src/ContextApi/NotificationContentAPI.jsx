@@ -27,7 +27,7 @@ export const SocketProvider = ({ userData, children }) => {
         newSocket.emit("register_admin");
       } else if (userData?.id) {
         // console.log("User:", userData);
-     newSocket.emit("register_user", userData.id);
+        newSocket.emit("register_user", userData.id);
       }
     });
 
