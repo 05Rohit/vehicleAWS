@@ -7,10 +7,10 @@ const Footer = () => {
       <footer className={FooterStyle.footer}>
         <p>GoGear - Your trusted vehicle rental partner</p>
         <div className={FooterStyle.footerLinks}>
-          <a href="#">About Us</a>
-          <a href="#">Privacy Policy</a>
+          <a href="/">About Us</a>
+          <a href="/">Privacy Policy</a>
           <a href="/contactus">Contact</a>
-          <a href="#">Support</a>
+          <a href="/">Support</a>
         </div>
       </footer>
     </>

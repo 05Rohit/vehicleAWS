@@ -1,7 +1,6 @@
 import { useState } from "react";
 import VehiclePageStyle from "./Vehicle.module.css";
 import ButtonStyle from "../../Css/button.module.css";
-import dummyImage from "../../assest/bike.jpg";
 import { Server_API } from "../../APIPoints/AllApiPonts";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../ContextApi/ToastContext";

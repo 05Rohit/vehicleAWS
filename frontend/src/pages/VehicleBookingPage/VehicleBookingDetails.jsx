@@ -95,6 +95,7 @@ const VehicleBookingDetails = () => {
       const PayAmount =Math.round(total);
       setFinalPayableAmount(PayAmount);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPriceAndRangeValue, taxPercentage]);
 
   // Add Helmet Charges

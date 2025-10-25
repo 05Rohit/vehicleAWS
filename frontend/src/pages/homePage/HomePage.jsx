@@ -260,6 +260,7 @@ const HomePage = ({ userData }) => {
               ListOfVehicle.slice(0, 6).map((vehicle) => (
                 <div key={vehicle.id} className={HomePageStyle.bikeCard}>
                   <div className={HomePageStyle.imageWrapper}>
+                    {console.log("Image URL:", `${Server_API}${vehicle.filePath[0]}`)}
                     {vehicle.filePath && vehicle.filePath.length > 0 && (
                       <img
                         src={`${Server_API}${vehicle.filePath[0]}`} // Prepend base URL to filePath
@@ -267,7 +268,6 @@ const HomePage = ({ userData }) => {
                         className={HomePageStyle.bikeImage}
                       />
                     )}
-
                     <div className={HomePageStyle.trendingBadge}>Trending</div>
                   </div>
 
