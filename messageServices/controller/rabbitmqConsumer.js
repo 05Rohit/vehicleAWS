@@ -1,3 +1,4 @@
+// ...existing code...
 require("dotenv").config();
 
 const amqp = require("amqplib");
@@ -13,7 +14,7 @@ const {
   userBookingStatusUpdateEmail,
 } = require("../utils/mailTemplate.jsx");
 
-const RABBITMQURL = process.env.RABBITMQURL;
+let RABBITMQURL = process.env.RABBITMQURL;
 const EXCHANGE = "emailExchange";
 const BOOKINGEXCHANGE = "bookingemailExchange";
 
@@ -22,6 +23,35 @@ const BASE_DELAY_MS = 1000; // 1s
 const HEARTBEAT = 60;
 const RECONNECT_BASE_MS = 1000;
 const RECONNECT_MAX_MS = 30000;
+
+function normalizeAmqpUrl(raw) {
+  if (!raw) return raw;
+  try {
+    raw = raw.replace(/^['"]|['"]$/g, "");
+    const u = new URL(raw);
+    if (u.username || u.password) {
+      const user = decodeURIComponent(u.username || "");
+      const pass = decodeURIComponent(u.password || "");
+      u.username = encodeURIComponent(user);
+      u.password = encodeURIComponent(pass);
+    }
+    return u.toString();
+  } catch (e) {
+    return raw;
+  }
+}
+
+function maskUrl(raw) {
+  try {
+    const u = new URL(raw);
+    if (u.password) u.password = "****";
+    return u.toString();
+  } catch (e) {
+    return raw ? raw.replace(/:\/\/.*@/, "://****:****@") : raw;
+  }
+}
+
+RABBITMQURL = normalizeAmqpUrl(RABBITMQURL);
 
 let sharedConnection = null;
 let starting = false;
@@ -32,22 +62,33 @@ async function ensureConnection(attempt = 0) {
   if (!RABBITMQURL) throw new Error("RABBITMQURL not set");
 
   try {
+    console.info("Attempting RabbitMQ connect:", maskUrl(RABBITMQURL).startsWith("amqps") ? "(amqps) TLS" : "(amqp) plain", maskUrl(RABBITMQURL));
     sharedConnection = await amqp.connect(RABBITMQURL, { heartbeat: HEARTBEAT });
+
     sharedConnection.on("close", (err) => {
       console.error("🔁 RabbitMQ shared connection closed", err && err.message ? err.message : "");
+      if (err && err.replyCode) console.error("  replyCode:", err.replyCode);
+      if (err && err.replyText) console.error("  replyText:", err.replyText);
       sharedConnection = null;
-      // try to restart consumers with backoff
       setTimeout(startAllConsumers, Math.min(RECONNECT_MAX_MS, RECONNECT_BASE_MS * Math.pow(2, startAttempt++)));
     });
+
     sharedConnection.on("error", (err) => {
       console.error("❌ RabbitMQ shared connection error", err && err.message ? err.message : "");
+      if (err && err.replyCode) console.error("  replyCode:", err.replyCode);
+      if (err && err.replyText) console.error("  replyText:", err.replyText);
+      if (err && err.stack) console.error(err.stack);
     });
+
     console.log("✅ RabbitMQ shared connection established");
     startAttempt = 0;
     return sharedConnection;
   } catch (err) {
     const delay = Math.min(RECONNECT_MAX_MS, RECONNECT_BASE_MS * Math.pow(2, attempt));
     console.error(`❌ RabbitMQ connect failed (attempt ${attempt + 1}). Retrying in ${delay}ms:`, err && err.message ? err.message : err);
+    if (err && err.replyCode) console.error("  replyCode:", err.replyCode);
+    if (err && err.replyText) console.error("  replyText:", err.replyText);
+    if (err && err.stack) console.error(err.stack);
     await new Promise((r) => setTimeout(r, delay));
     return ensureConnection(attempt + 1);
   }
@@ -57,6 +98,9 @@ async function startConsumer({ exchange, routingKey, queueName, dlqName, handler
   try {
     const conn = await ensureConnection();
     const ch = await conn.createChannel();
+
+    ch.on("error", (err) => console.error("Channel error:", err && err.message ? err.message : ""));
+    ch.on("close", () => console.warn("Channel closed:", queueName));
 
     await ch.assertExchange(exchange, exchangeType, { durable: true });
     if (dlqName) await ch.assertQueue(dlqName, { durable: true });
@@ -86,6 +130,7 @@ async function startConsumer({ exchange, routingKey, queueName, dlqName, handler
           await handler(payload);
           ch.ack(msg);
         } catch (err) {
+          console.error(`Handler error for ${queueName}:`, err && err.message ? err.message : err);
           if (retryCount < MAX_RETRIES) {
             const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
             setTimeout(() => {
@@ -100,7 +145,6 @@ async function startConsumer({ exchange, routingKey, queueName, dlqName, handler
               ch.sendToQueue(dlqName, msg.content, { persistent: true });
               ch.ack(msg);
             } else {
-              // no DLQ configured, nack without requeue
               ch.nack(msg, false, false);
             }
           }
@@ -112,8 +156,9 @@ async function startConsumer({ exchange, routingKey, queueName, dlqName, handler
     console.log(`🟢 Consumer started: ${queueName} -> ${exchange}:${routingKey}`);
   } catch (err) {
     console.error(`❌ Failed to start consumer ${queueName}:`, err && err.message ? err.message : err);
-    // clear shared connection so ensureConnection will attempt reconnect
-    try { if (sharedConnection) await sharedConnection.close().catch(()=>{}); } catch(_) {}
+    if (err && err.replyCode) console.error("  replyCode:", err.replyCode);
+    if (err && err.replyText) console.error("  replyText:", err.replyText);
+    try { if (sharedConnection) await sharedConnection.close().catch(() => {}); } catch (_) {}
     sharedConnection = null;
     setTimeout(() => startConsumer({ exchange, routingKey, queueName, dlqName, handler, exchangeType }), 5000);
   }
@@ -143,7 +188,6 @@ function startAllConsumers() {
     { exchange: BOOKINGEXCHANGE, routingKey: "bookingtask.userbookedvehiclestatusupdate", queueName: "userbookedvehiclestatusupdate", dlqName: "userbookedvehiclestatusupdateDLQ", handler: emailHandlerFactory(userBookingStatusUpdateEmail), exchangeType: "direct" },
   ];
 
-  // start each consumer (creates channel per consumer)
   consumers.forEach((cfg) => startConsumer(cfg));
 
   starting = false;
@@ -152,4 +196,18 @@ function startAllConsumers() {
 // initialize
 startAllConsumers();
 
+async function closeSharedConnection() {
+  try {
+    if (sharedConnection) {
+      await sharedConnection.close().catch(() => {});
+      sharedConnection = null;
+    }
+  } catch (_) {}
+}
+
+process.on("exit", closeSharedConnection);
+process.on("SIGINT", () => closeSharedConnection().then(() => process.exit(0)));
+process.on("SIGTERM", () => closeSharedConnection().then(() => process.exit(0)));
+
 module.exports = { startAllConsumers };
+// ...existing code...
