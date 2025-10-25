@@ -1,68 +1,98 @@
+require("dotenv").config();
 const amqp = require("amqplib");
 const axios = require("axios");
-require("dotenv").config();
 
 const BACKEND_SERVICE_URL = process.env.BACKEND_SERVICE_URL;
-const RABBITMQURL = process.env.RABBITMQURL;
+const RABBITMQURL = process.env.RABBITMQURL + "?heartbeat=30"; // ✅ Shorter heartbeat for render
+
+const EXCHANGE = "notifications_topic";
+const DLX_EXCHANGE = "dlx_notifications";
+
 const MAX_RETRIES = 5;
 
-async function notificationConsumer(rolename, io) {
+let connection;
+let channel;
+
+// ✅ Auto reconnection function
+async function connectRabbitMQ() {
   try {
-    // 1️⃣ Connect to RabbitMQ
-    const connection = await amqp.connect(RABBITMQURL);
-    const channel = await connection.createChannel();
-
-    const exchange = "notifications_topic";
-    await channel.assertExchange(exchange, "topic", { durable: true });
-
-    // 2️⃣ Create and bind queue
-    const queueName = `notify_admin`;
-    await channel.assertQueue(queueName, {
-      durable: true,
-      arguments: { "x-dead-letter-exchange": "dlx_exchange" },
+    connection = await amqp.connect(RABBITMQURL);
+    connection.on("close", () => {
+      console.error("🔁 Connection closed, retrying…");
+      setTimeout(connectRabbitMQ, 5000);
     });
 
+    connection.on("error", (err) => {
+      console.error("⚠️ Connection error:", err.message);
+    });
+
+    channel = await connection.createChannel();
+    console.log("✅ Connected to RabbitMQ");
+  } catch (err) {
+    console.error("❌ Failed to connect. Retrying in 5s:", err.message);
+    setTimeout(connectRabbitMQ, 5000);
+  }
+}
+
+async function notificationConsumer(rolename, io) {
+  await connectRabbitMQ();
+
+  try {
+    // ✅ Create Main Exchange
+    await channel.assertExchange(EXCHANGE, "topic", { durable: true });
+
+    // ✅ Dead Letter Exchange
+    await channel.assertExchange(DLX_EXCHANGE, "fanout", { durable: true });
+
+    const queueName = `notify_${rolename}`;
+    await channel.assertQueue(queueName, {
+      durable: true,
+      arguments: {
+        "x-dead-letter-exchange": DLX_EXCHANGE,
+      },
+    });
+
+    // ✅ Bind based on role
     if (rolename === "admin") {
-      await channel.bindQueue(queueName, exchange, `notify.admin`);
+      await channel.bindQueue(queueName, EXCHANGE, "notify.admin");
     } else if (rolename === "user") {
-      await channel.bindQueue(queueName, exchange, `notify.user.*`);
+      await channel.bindQueue(queueName, EXCHANGE, "notify.user.*");
     }
 
-    // 3️⃣ Consume messages
+    console.log(`📌 Listening for notifications: ${queueName}`);
+
     channel.consume(
       queueName,
       async (msg) => {
         if (!msg) return;
 
         const data = JSON.parse(msg.content.toString());
-        // console.log("Received notification:", data);
 
         try {
-          // 4️⃣ Emit via socket
-          if (data.rolename === "user") {
+          // ✅ Emit websocket event
+          if (data.rolename === "user")
             io.to(data.userId).emit("new_notification", data);
-          } else if (data.rolename === "admin") {
+          if (data.rolename === "admin")
             io.to("admin").emit("new_notification", data);
-          }
 
-          // 5️⃣ Save to backend
+          // ✅ Save to backend DB
           await sendToBackend(data);
+
           channel.ack(msg);
         } catch (err) {
-          console.error("Failed to process notification:", err.message);
-          channel.nack(msg, false, false);
+          console.error("⚠️ Processing error:", err.message);
+          channel.nack(msg, false, false); // send to DLX
         }
       },
       { noAck: false }
     );
   } catch (err) {
-    console.error("❌ RabbitMQ Connection Error:", err.message);
+    console.error("❌ Channel/Binding Error:", err.message);
   }
 }
 
-// Helper function to send notification to backend API with retry
+// ✅ Backend API retry logic
 async function sendToBackend(data, attempt = 1) {
-  // console.log(data.title)
   if (!BACKEND_SERVICE_URL) return;
 
   try {
@@ -78,10 +108,10 @@ async function sendToBackend(data, attempt = 1) {
     console.error(`❗ Backend attempt ${attempt} failed:`, err.message);
 
     if (attempt < MAX_RETRIES) {
-      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      await new Promise((res) => setTimeout(res, 1000 * attempt));
       return sendToBackend(data, attempt + 1);
     } else {
-      console.error("🚫 Max retries reached. Notification failed permanently.");
+      console.error("🚫 Backend Save Failed (DLX message created)");
     }
   }
 }
