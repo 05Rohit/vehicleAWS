@@ -3,7 +3,7 @@ const showToast = (type, list, setList, message) => {
   switch (type) {
     case "success":
       toastProperties = {
-        id: list.length + 1,
+        id: Date.now() + Math.random(),
         title: "Success",
         description: message,
         backgroundColor: "#136C34",
@@ -12,7 +12,7 @@ const showToast = (type, list, setList, message) => {
       break;
     case "danger":
       toastProperties = {
-        id: list.length + 1,
+        id: Date.now() + Math.random(),
         title: "Error",
         description: message,
         backgroundColor: "#d9534f",
@@ -26,3 +26,4 @@ const showToast = (type, list, setList, message) => {
 };
 
 export default showToast;
+

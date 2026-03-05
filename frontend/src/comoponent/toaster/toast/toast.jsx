@@ -1,35 +1,31 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 
 import styles from "./toast.module.css";
 import ToasterSuccessTickIcon from "../../../assest/checkIcon.png";
 import ToasterSuccessAlertIcon from "../../../assest/errorIcon.png";
 
 const Toast = ({ toastList = [], position, setList }) => {
-  
-  const deleteToast = useCallback(
-    (id) => {
-      const toastListItem = toastList.filter((e) => e.id !== id);
-      setList(toastListItem);
-    },
-    [toastList, setList]
-  );
+  const deleteToast = (id) => {
+    setList((prev) => prev.filter((toast) => toast.id !== id));
+  };
 
-
+  // Auto remove toast (cleanup included)
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (toastList.length) {
-        deleteToast(toastList[0].id);
-      }
+    if (!toastList.length) return;
+
+    const timer = setTimeout(() => {
+      deleteToast(toastList[0].id);
     }, 2500);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [toastList, deleteToast]);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toastList]);
 
   return (
     <div
       className={`${styles.Toastcontainer} ${styles[position]}`}
-      style={{ zIndex: toastList.length ? 0 : -100 }}
+      // style={{ zIndex: toastList.length ? 0 : -100 }}
+      style={{ zIndex: toastList.length ? 9999 : -1 }}
     >
       {toastList.map((toast) => (
         <div

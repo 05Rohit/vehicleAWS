@@ -9,12 +9,13 @@ import {
   Shield,
   AlertCircle,
   IndianRupee,
+  CalendarDays,
 } from "lucide-react";
 
 import customStyle from "./VehicleBooking.module.css";
-import { Server_API } from "../../APIPoints/AllApiPonts";
 import { useToast } from "../../ContextApi/ToastContext";
-import api from "../../axiosInterceptors/AxiosSetup";
+import { useDispatch } from "react-redux";
+import { createBooking } from "../../appRedux/redux/bookingSlice/vehicleBookingSlice";
 
 const VehicleBookingDetails = () => {
   const { handleShowToast } = useToast();
@@ -26,6 +27,9 @@ const VehicleBookingDetails = () => {
     selectedPriceAndRangeValue,
   } = location.state || {};
 
+  const dispatch = useDispatch();
+
+  // Function to calculate day difference
   const getDayDifference = (startDate, endDate) => {
     if (!startDate || !endDate) return 0;
 
@@ -55,7 +59,7 @@ const VehicleBookingDetails = () => {
   const navigate = useNavigate(); // <-- Fix: call useNavigate as a hook
 
   // States
-  const [taxPercentage] = useState(18);
+  const [taxPercentage] = useState(17);
   const [totalAmount, setTotalAmount] = useState(0);
   const [finalPayableAmount, setFinalPayableAmount] = useState(0);
   const [bookingStartDate, setBookingStartDate] = useState("");
@@ -90,9 +94,10 @@ const VehicleBookingDetails = () => {
       const basicPrice = selectedPriceAndRangeValue.price * TotalDays;
       const taxAmount = (basicPrice * taxPercentage) / 100;
       const total = basicPrice + taxAmount;
-      setTotalAmount(total);
+      setTotalAmount(Math.round(total));
       setFinalTaxAmount(taxAmount);
-      const PayAmount =Math.round(total);
+      const PayAmount = Math.round(total);
+      console.log("PayAmount:", PayAmount);
       setFinalPayableAmount(PayAmount);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,30 +120,26 @@ const VehicleBookingDetails = () => {
     }
 
     try {
-      await api.post(
-        `${Server_API}/addbooking`,
-        {
+      const res = await dispatch(
+        createBooking({
           pickupDate: startDate,
           dropOffDate: EndDate,
-          // pickupLocation: "abc",
-          // dropOffLocation: "def",
           price: selectedPriceAndRangeValue.price,
           extraExpenditure: AdditonalExpenditurePrice,
           tax: taxPercentage,
           totalPrice: finalPayableAmount,
           uniqueGroupId: SelectedVehicleDetails.uniqueGroupId,
           bookingStatus: "confirmed",
-        },
-        { withCredentials: true }
-      );
-      handleShowToast("success", "Booking successful!");
+        })
+      ).unwrap();
+
+      handleShowToast("success", res || "Booking successful!");
       setTimeout(() => {
         navigate("/bookinglist");
       }, 1000);
     } catch (error) {
-      console.error("Booking error:", error);
-      const ErrorMessage = error.response.data.message || "Booking failed";
-      handleShowToast("danger", ErrorMessage);
+      console.error("Booking Error:", error);
+      handleShowToast("danger", error || "Booking failed!");
     }
   };
 
@@ -147,10 +148,13 @@ const VehicleBookingDetails = () => {
     (1000 * 60 * 60)
   ).toFixed(2);
 
+  const diffMs = new Date(EndDate) - new Date(startDate);
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.round((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
   return (
     <>
-      <div className={customStyle.pageContainer}>      
-
+      <div className={customStyle.pageContainer}>
         {/* Main Content */}
         <main className={customStyle.main}>
           <div className={customStyle.pageTitle}>
@@ -171,15 +175,10 @@ const VehicleBookingDetails = () => {
                     {SelectedVehicleDetails.filePath &&
                     SelectedVehicleDetails.filePath.length > 0 ? (
                       <img
-                        src={`${Server_API}${SelectedVehicleDetails.filePath[0]}`} // Prepend base URL to filePath
+                        src={SelectedVehicleDetails.filePath[0]} // Prepend base URL to filePath
                         alt="VehicleImage"
                       />
-                    ) : (
-                      <img
-                        src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&auto=format&fit=crop"
-                        alt="vehicle"
-                      />
-                    )}
+                    ) : null}
                   </div>
 
                   <h2>Vehicle Name: {SelectedVehicleDetails?.name}</h2>
@@ -249,7 +248,14 @@ const VehicleBookingDetails = () => {
                     <p>Tax</p>
                     <span>
                       <IndianRupee size={14} />
-                      {`${finalTaxAmount}`}
+                      {`${finalTaxAmount}`} ({taxPercentage}%)
+                    </span>
+                  </div>
+                  <div className={customStyle.card_Box}>
+                    <p>Days</p>
+                    <span>
+                      <CalendarDays size={14} />
+                      {`${days} days ${hours} hours`}
                     </span>
                   </div>
                   <div className={customStyle.card_Box}>
@@ -334,7 +340,7 @@ const VehicleBookingDetails = () => {
               {/* Book Now */}
               <div className={customStyle.card}>
                 <div className={customStyle.cardHeaderWhite}>
-                  <span>Total Amount</span>
+                  <span>Pay Amount</span>
                   <strong>₹{finalPayableAmount}</strong>
                 </div>
                 <div className={customStyle.bookNowBtn_container}>

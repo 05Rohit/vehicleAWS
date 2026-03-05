@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Server_API } from "../../APIPoints/AllApiPonts";
 import { useToast } from "../../ContextApi/ToastContext";
 import GroupPageStyle from "./GroupVehicleUpdate.module.css";
 import FormStyles from "../../Css/formContainer.module.css";
@@ -15,13 +14,26 @@ import {
   DollarSign,
   Edit2,
 } from "lucide-react";
-import api from "../../axiosInterceptors/AxiosSetup";
-const VechicleGroupUpadtesModel = ({
-  selectedGroup,
-  handleGroupClose,
-  handleGetAllVehicleList,
-}) => {
+import { updateGroupVehicleData } from "./../../appRedux/redux/vehicleSlice/groupVehicleUpdateSlice";
+import { useDispatch } from "react-redux";
+import { getVehicleData } from "../../appRedux/redux/vehicleSlice/getvehicleSlice";
+
+const crossBtnStyle = {
+  color: "red",
+  border: "1px solid red",
+  borderRadius: "50%",
+  padding: "2px",
+  transition: "all 0.2s ease",
+  "&:hover": {
+    color: "red",
+    cursor: "pointer",
+    transform: "scale(1.2)",
+  },
+};
+
+const VechicleGroupUpadtesModel = ({ selectedGroup, handleGroupClose }) => {
   const { handleShowToast } = useToast();
+  const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
     name: selectedGroup.name,
@@ -56,30 +68,6 @@ const VechicleGroupUpadtesModel = ({
     setBookingPrice([...bookingPrice, { range: "", price: "" }]);
   };
 
-  const handleUpdateVehicleDetails = async (vehicleId) => {
-    const updatedVehicle = {
-      ...formData,
-      bookingPrice: bookingPrice,
-    };
-
-    try {
-      await api.patch(
-        `${Server_API}/updatevehiclegroup/${vehicleId}`,
-        updatedVehicle,
-        {
-          withCredentials: true,
-        }
-      );
-      handleGetAllVehicleList();
-      handleShowToast("success", "Vehicle updated successfully");
-      handleGroupClose();
-    } catch (error) {
-      const ErrMessage =
-        error.response?.data?.error || "Error updating vehicle";
-      handleShowToast("danger", ErrMessage);
-    }
-  };
-
   const handleRemoveBookingPrice = (index) => {
     if (bookingPrice.length === 1) return;
     setBookingPrice(bookingPrice.filter((_, i) => i !== index));
@@ -91,6 +79,28 @@ const VechicleGroupUpadtesModel = ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  /*Handle Update Single Vehicle of The Group */
+
+  const handleUpdateVehicleDetails = async (vehicleId) => {
+    const updatedVehicle = {
+      ...formData,
+      bookingPrice: bookingPrice,
+    };
+
+    try {
+      const res = await dispatch(
+        updateGroupVehicleData({ id: vehicleId, vehicleData: updatedVehicle })
+      ).unwrap();
+
+      handleShowToast("success", res);
+      handleGroupClose();
+
+      dispatch(getVehicleData());
+    } catch (error) {
+      handleShowToast("danger", error);
+    }
   };
 
   const handleSave = () => {
@@ -106,8 +116,16 @@ const VechicleGroupUpadtesModel = ({
     });
     setIsEditing(false);
   };
+
+  const handleClose = () => {
+    console.log("Closing modal");
+    handleGroupClose();
+  };
   return (
     <>
+      <div style={{ paddingBottom: "10px", textAlign: "right" }}>
+        <X className={GroupPageStyle.cross_btn}   onClick={handleClose} />
+      </div>
       <div className={GroupPageStyle.gridContainer}>
         {/* Left Column */}
         <div className={GroupPageStyle.leftCard}>
@@ -119,11 +137,10 @@ const VechicleGroupUpadtesModel = ({
             <div className={GroupPageStyle.imageContainer}>
               {selectedGroup.filePath && selectedGroup.filePath.length > 0 && (
                 <img
-                  src={`${Server_API}${selectedGroup.filePath[0]}`} // Prepend base URL to filePath
+                  src={selectedGroup.filePath[0]} // Prepend base URL to filePath
                   alt="VehicleImage"
                 />
               )}
-           
             </div>
 
             <div className={GroupPageStyle.infoBlock}>

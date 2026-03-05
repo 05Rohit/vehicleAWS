@@ -31,9 +31,17 @@ function getCallerInfo() {
 }
 
 // Custom format to include caller info
+// const logFormat = winston.format.printf(({ timestamp, level, message, stack }) => {
+//   const callerInfo = getCallerInfo();
+//   return `${level}:- [${callerInfo}] ${message} ${stack || ''} ${timestamp} `;
+// });
 const logFormat = winston.format.printf(({ timestamp, level, message, stack }) => {
-  const callerInfo = getCallerInfo();
-  return `${level}:- [${callerInfo}] ${message} ${stack || ''} ${timestamp} `;
+  const msg =
+    typeof message === "object"
+      ? JSON.stringify(message, null, 2)
+      : message;
+
+  return `${level}: ${msg} ${stack || ""} [${timestamp}]`;
 });
 
 const logger = winston.createLogger({

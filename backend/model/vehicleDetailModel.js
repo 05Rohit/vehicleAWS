@@ -7,6 +7,7 @@ const specificVehicleSchema = new mongoose.Schema({
   location: {
     type: String,
     default: "abc",
+    trim: true,
   },
   vehicleStatus: {
     type: Boolean,
@@ -15,19 +16,24 @@ const specificVehicleSchema = new mongoose.Schema({
   vehicleNumber: {
     type: String,
     required: true,
+    trim: true,
     unique: true, // Enforce unique at application level, not DB level
   },
   vehicleMilage: {
     type: Number,
     default: null,
+    trim: true,
   },
   notAvailableReason: {
     type: String,
-    // enum: ["In Repair", "Accident", "Other", "Booking"],
+    enum: ["In Repair", "Accident", "Other", "Booking"],
     default: null,
+    trim: true,
   },
   uniqueVehicleId: {
     type: Number,
+    unique: true,
+    trim: true,
   },
   bookedPeriods: [
     {
@@ -50,14 +56,17 @@ const vehicleDetailSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    trim: true,
   },
   description: {
     type: String,
     default: null,
+    trim: true,
   },
   vehicleType: {
     type: String,
     required: true,
+    trim: true,
   },
   model: {
     type: String,
@@ -79,6 +88,7 @@ const vehicleDetailSchema = new mongoose.Schema({
 
   uniqueGroupId: {
     type: Number,
+    unique: true,
     required: true,
   },
   filePath: [{ type: String }],
@@ -103,32 +113,32 @@ vehicleDetailSchema.pre("validate", function (next) {
   }
   next();
 });
-specificVehicleSchema.pre("validate", function (next) {
-  if (this.isNew) {
-    const currentDate = moment().format("YYYYMM");
-    const currentTime = moment().format("HHmmss");
-    this.uniqueVehicleId = `${currentDate}${currentTime}`;
-  }
-  next();
-});
+// specificVehicleSchema.pre("validate", function (next) {
+//   if (this.isNew) {
+//     const currentDate = moment().format("YYYYMM");
+//     const currentTime = moment().format("HHmmss");
+//     this.uniqueVehicleId = `${currentDate}${currentTime}`;
+//   }
+//   next();
+// });
 
 // Pre-save hook for timestamps
-vehicleDetailSchema.pre("save", function (next) {
-  const istTime = moment().toDate();
-  istTime.setMinutes(istTime.getMinutes() + 330); // Add 5 hours 30 minutes
+// vehicleDetailSchema.pre("save", function (next) {
+//   const istTime = moment().toDate();
+//   istTime.setMinutes(istTime.getMinutes() + 330); // Add 5 hours 30 minutes
 
-  if (this.isNew) {
-    this.createdAt = istTime;
-  }
-  this.updatedAt = istTime;
+//   if (this.isNew) {
+//     this.createdAt = istTime;
+//   }
+//   this.updatedAt = istTime;
 
-  // Update timestamps for specific vehicles
-  this.specificVehicleDetails.forEach((vehicle) => {
-    vehicle.updatedAt = istTime;
-  });
+//   // Update timestamps for specific vehicles
+//   this.specificVehicleDetails.forEach((vehicle) => {
+//     vehicle.updatedAt = istTime;
+//   });
 
-  next();
-});
+//   next();
+// });
 
 const VehicleDetailModel = mongoose.model("VehiclesData", vehicleDetailSchema);
 module.exports = VehicleDetailModel;

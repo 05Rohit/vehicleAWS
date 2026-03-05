@@ -672,9 +672,115 @@ async function userBookingStatusUpdateEmail({ to, subject, templateData }) {
   });
 }
 
+async function otpEmailTemplate({ to, subject, templateData }) {
+  await Transporter.transporter.sendMail({
+    from: { name: "GO GEAR", address: senderMail },
+    to,
+    subject,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GO GEAR OTP Verification</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f4f6fb;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 480px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+      padding: 32px 28px;
+    }
+    h2 {
+      color: #2c3e50;
+      margin-bottom: 12px;
+    }
+    .greeting {
+      font-size: 16px;
+      margin-bottom: 18px;
+    }
+    .otp-box {
+      background: #eaf2ff;
+      border-left: 4px solid #2980b9;
+      padding: 16px 20px;
+      border-radius: 6px;
+      margin: 22px 0;
+      text-align: center;
+    }
+    .otp {
+      font-size: 32px;
+      letter-spacing: 4px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .info {
+      margin-top: 18px;
+      font-size: 14px;
+      color: #555;
+    }
+    .footer {
+      font-size: 13px;
+      color: #888;
+      margin-top: 32px;
+      text-align: center;
+    }
+    .support {
+      color: #2980b9;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Your OTP for Verification</h2>
+
+    <p class="greeting">Hello <b>${templateData.name}</b>,</p>
+    <p>Use the OTP below to complete your login or account verification on <b>GO GEAR</b>.</p>
+
+    <div class="otp-box">
+      <div class="otp">${templateData.otp}</div>
+    </div>
+    
+
+      <p style="margin-bottom: 10px;">
+      <b>Expires In:</b> ${templateData.experyTime}
+    </p>
+
+    <a href="${templateData.frontendUrl}" class="button" target="_blank">
+      Open Verification Page
+    </a>
+
+    <p class="info">
+      This OTP is valid for the next <b>10 minutes</b>.  
+      Please do not share this code with anyone for security reasons.
+    </p>
+
+    <p>If you did not request this OTP, please ignore this email or contact support at 
+      <span class="support">${senderMail}</span>.
+    </p>
+
+    <div class="footer">
+      Regards,<br>
+      <b>Team GO GEAR</b>
+    </div>
+  </div>
+</body>
+</html>`,
+  });
+}
+
 module.exports = {
   vehicleCreationEmail,
   userCreationEmail,
+  otpEmailTemplate,
   userPasswordChangeEmail,
   vehicleUpdateEmail,
   vehicleDeleteEmail,

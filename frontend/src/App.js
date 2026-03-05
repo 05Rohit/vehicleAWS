@@ -1,66 +1,69 @@
-// import { BrowserRouter } from "react-router-dom";
-// import "./App.css";
-// import Layout from "./comoponent/layout/Layout";
-// import { ToastProvider } from "./ContextApi/ToastContext";
-// // import { SocketProvider } from "./ContextApi/NotificationContentAPI";
-
-// import { disableReactDevTools } from "@fvilers/disable-react-devtools";
-// //       setLoading(false);
-
-// if (process.env.App_ENV === "production") {
-//   disableReactDevTools();
-// }
-
-// function App() {
-//   return (
-//     <>
-//       <ToastProvider>
-//         {/* <SocketProvider userData={userData}> */}
-//           <BrowserRouter>
-//             <Layout />
-//           </BrowserRouter>
-//         {/* </SocketProvider> */}
-//       </ToastProvider>
-//     </>
-//   );
-// }
-
-// export default App;
 
 
-
+import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import "./App.css";
 import Layout from "./comoponent/layout/Layout";
 import { ToastProvider } from "./ContextApi/ToastContext";
 import { LoaderProvider, useLoader } from "./ContextApi/LoaderContext";
-import { loaderHandler } from "./ContextApi/LoaderHandler";
-import Preloader from "./preLoader/Preloader.jsx";  // your animated loader component
+import Preloader from "./preLoader/Preloader.jsx";
 import { disableReactDevTools } from "@fvilers/disable-react-devtools";
-import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { checkAuth } from "./appRedux/redux/authSlice/loginSlice.js";
 
 if (process.env.App_ENV === "production") {
   disableReactDevTools();
 }
 
-const LoaderBridge = () => {
-  const { showLoader, hideLoader, isLoading } = useLoader();
 
-  // Connect React context to loaderHandler
+const LoaderBridge = () => {
+  const dispatch = useDispatch();
+  const { showLoader, hideLoader } = useLoader();
+
+  const loginLoading = useSelector((state) => state.login.loading);
+  const otpLoading = useSelector((state) => state.login.otpLoading);
+  const checkingAuth = useSelector((state) => state.login.checkingAuth);
+
+  const addVehicleLoading = useSelector((state) => state.addVehicle.loading);
+  const getVehicleLoading = useSelector((state) => state.vehicleList.loading);
+  const getBookingLoading = useSelector((state) => state.booking?.loading);
+
+  const loading =
+    loginLoading ||
+    otpLoading ||
+    addVehicleLoading ||
+    getVehicleLoading ||
+    getBookingLoading;
+
+  // ✅ ALWAYS called
+useEffect(() => {
+  // Only check auth if we haven't finished checking yet
+  if (checkingAuth) {
+    dispatch(checkAuth());
+  }
+}, [dispatch, checkingAuth]);
+
+  // ✅ ALWAYS called
   useEffect(() => {
-    loaderHandler.showLoader = showLoader;
-    loaderHandler.hideLoader = hideLoader;
-  }, [showLoader, hideLoader]);
+    if (loading) showLoader();
+    else hideLoader();
+  }, [loading]);
+
+  // ✅ CONDITIONAL RETURN AFTER HOOKS
+  if (checkingAuth) {
+    return <Preloader />;
+  }
 
   return (
     <>
-      {isLoading && <Preloader />} {/* Loader visible when any API runs */}
+      {loading && <Preloader />}
       <BrowserRouter>
         <Layout />
       </BrowserRouter>
     </>
   );
 };
+
 
 function App() {
   return (

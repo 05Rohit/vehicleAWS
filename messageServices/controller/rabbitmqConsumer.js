@@ -12,6 +12,7 @@ const {
   userForgotPasswordEmail,
   userBookingConfirmationEmail,
   userBookingStatusUpdateEmail,
+  otpEmailTemplate,
 } = require("../utils/mailTemplate.jsx");
 
 // Env Variables
@@ -157,6 +158,13 @@ const consumers = [
     dlqName: "usercreatedDLQ",
     exchange: EMAIL_EXCHANGE,
     handler: userCreationEmail,
+  },
+  {
+    routingKey: "task.sendotp",
+    queueName: "sendotp",
+    dlqName: "sendotpDLQ",
+    exchange: EMAIL_EXCHANGE,
+    handler: otpEmailTemplate,
   },
   {
     routingKey: "task.userPasswordChanged",

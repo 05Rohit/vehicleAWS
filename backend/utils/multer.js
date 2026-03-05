@@ -1,42 +1,51 @@
 const multer = require("multer");
-const path = require("path");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 
-// Allowed file types
-const allowedFileTypes = ["image/jpeg", "image/jpg", "image/png" ,'image/webp'];
+/**
+ * Dynamic Cloudinary storage
+ * @param {string} folderName - cloudinary folder name
+ */
+const getCloudinaryStorage = (folderName) =>
+  new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: folderName,
+      allowed_formats: ["jpg", "jpeg", "png", "pdf"],
+      public_id: (req, file) => {
+        const uniqueName = Date.now() + "-" + file.originalname.split(".")[0];
+        return uniqueName;
+      },
+    },
+  });
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads"); // Ensure "uploads" folder exists
-  },
-  filename: function (req, file, cb) {
-    // Unique filename
-    const uniqueSuffix =
-      Date.now() +
-      "-" +
-      Math.round(Math.random() * 1e9) +
-      path.extname(file.originalname);
-    cb(null, uniqueSuffix);
-  },
-});
+/* =========================
+   VEHICLE FILE UPLOAD
+========================= */
+const vehicleUpload = multer({
+  storage: getCloudinaryStorage("vehicles"),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+}).array("files", 5);
 
-// File filter function to allow only specific formats
-const fileFilter = (req, file, cb) => {
-  if (!file) {
-    // If no file is provided, allow the request to proceed
-    cb(null, true);
-  } else if (allowedFileTypes.includes(file.mimetype)) {
-    cb(null, true); // Accept the file
-  } else {
-    cb(new Error("Only JPG, JPEG, and PNG files are allowed!"), false);
-  }
+/* =========================
+   USER FILE UPLOAD
+========================= */
+const userUpload = multer({
+  storage: getCloudinaryStorage("users"),
+  limits: { fileSize: 2 * 1024 * 1024 },
+}).array("files");
+
+/* =========================
+   SINGLE FILE (OPTIONAL)
+========================= */
+const singleUserUpload = multer({
+  storage: getCloudinaryStorage("users"),
+  limits: { fileSize: 10 * 1024 * 1024 },
+}).single("files");
+console.log("Multer configuration loaded.", userUpload);
+
+module.exports = {
+  vehicleUpload,
+  userUpload,
+  singleUserUpload,
 };
-
-const maxSize = 5 * 1024 * 1024; // 1MB file size limit
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: maxSize },
-  fileFilter: fileFilter,
-});
-
-module.exports = upload;

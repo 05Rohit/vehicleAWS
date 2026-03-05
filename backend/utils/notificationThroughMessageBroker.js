@@ -35,9 +35,7 @@ async function sendNotification(userId, rolename, message, title, type) {
 
   try {
     let routingKey =
-      rolename === "admin"
-        ? "notify.admin"
-        : `notify.user.${userId}`;
+      rolename === "admin" ? "notify.admin" : `notify.user.${userId}`;
 
     const notificationId = Date.now().toString(36);
 

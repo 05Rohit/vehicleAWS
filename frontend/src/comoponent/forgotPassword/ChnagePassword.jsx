@@ -28,7 +28,9 @@ const ChnagePassword = ({ handleClose }) => {
     }));
   };
 
-  const handleChangePassword = async () => {
+  const handleChangePassword = async (e) => {
+    e.preventDefault(); // ✅ MUST be first line
+
     if (
       !loginValue.oldPassword ||
       !loginValue.newPassword ||
@@ -39,13 +41,9 @@ const ChnagePassword = ({ handleClose }) => {
     }
 
     try {
-      const res = await api.patch(
-        `${Server_API}/changepassword`,
-        loginValue,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await api.patch(`${Server_API}/changepassword`, loginValue, {
+        withCredentials: true,
+      });
 
       if (res.data.status === "success") {
         handleShowToast("success", res.data.message);
@@ -75,93 +73,107 @@ const ChnagePassword = ({ handleClose }) => {
           <p>Update Your Password</p>
         </div>
 
-        <div className={FormStyles.form}>
-          <div className={FormStyles.form_group}>
-            {" "}
-            <label htmlFor="oldPassword">Current Password</label>
-            <div className={FormStyles.input_wrapper}>
-              <Lock className={FormStyles.icon_input} />
+        <form onSubmit={(e) => handleChangePassword(e)} method="post">
+          <div className={FormStyles.form}>
+            <div className={FormStyles.form_group}>
+              {" "}
+              <label htmlFor="oldPassword">Current Password</label>
+              <div className={FormStyles.input_wrapper}>
+                <Lock className={FormStyles.icon_input} />
 
-              <input
-                type={showPassword ? "text" : "password"}
-                name="oldPassword"
-                id="oldPassword"
-                placeholder="Enter Current password"
-                value={loginValue.oldPassword}
-                onChange={(e) => handleChange(e, "oldPassword")}
-                required
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className={FormStyles.toggle_visibility}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </button>
+                <input
+                  type="text"
+                  name="username"
+                  autoComplete="username"
+                  // value={response?.user?.email || ""}
+                  readOnly
+                  hidden
+                />
+
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="oldPassword"
+                  id="oldPassword"
+                  placeholder="Enter Current password"
+                  value={loginValue.oldPassword}
+                  onChange={(e) => handleChange(e, "oldPassword")}
+                  required
+                  autoComplete="oldPassword"
+                />
+                <button
+                  type="button"
+                  className={FormStyles.toggle_visibility}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className={FormStyles.form_group}>
-            {" "}
-            <label htmlFor="newPassword">New Password</label>
-            <div className={FormStyles.input_wrapper}>
-              <Lock className={FormStyles.icon_input} />
-              <input
-                type={showNewPassword ? "text" : "password"}
-                name="newPassword"
-                id="newPassword"
-                placeholder="Enter New password"
-                value={loginValue.newPassword}
-                className={NavBarStyle.loginpage_BoxContent_InputTag}
-                onChange={(e) => handleChange(e, "newPassword")}
-                required
-              />
-              <button
-                type="button"
-                className={FormStyles.toggle_visibility}
-                onClick={() => setShowNewPassword(!showNewPassword)}
-              >
-                {showNewPassword ? <EyeOff /> : <Eye />}
-              </button>
+            <div className={FormStyles.form_group}>
+              {" "}
+              <label htmlFor="newPassword">New Password</label>
+              <div className={FormStyles.input_wrapper}>
+                <Lock className={FormStyles.icon_input} />
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  name="newPassword"
+                  id="newPassword"
+                  placeholder="Enter New password"
+                  value={loginValue.newPassword}
+                  className={NavBarStyle.loginpage_BoxContent_InputTag}
+                  onChange={(e) => handleChange(e, "newPassword")}
+                  autoComplete="newPassword" // ✅ REQUIRED
+                  required
+                />
+                <button
+                  type="button"
+                  className={FormStyles.toggle_visibility}
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className={FormStyles.form_group}>
-            <label htmlFor="confirmNewPassword">Confirm Password</label>
-            <div className={FormStyles.input_wrapper}>
-              <Lock className={FormStyles.icon_input} />
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmNewPassword"
-                id="confirmNewPassword"
-                placeholder="Confirm New password"
-                value={loginValue.confirmNewPassword}
-                className={NavBarStyle.loginpage_BoxContent_InputTag}
-                onChange={(e) => handleChange(e, "confirmNewPassword")}
-                required
-              />
-              <button
-                type="button"
-                className={FormStyles.toggle_visibility}
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeOff /> : <Eye />}
-              </button>
+            <div className={FormStyles.form_group}>
+              <label htmlFor="confirmNewPassword">Confirm Password</label>
+              <div className={FormStyles.input_wrapper}>
+                <Lock className={FormStyles.icon_input} />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmNewPassword"
+                  id="confirmNewPassword"
+                  placeholder="Confirm New password"
+                  value={loginValue.confirmNewPassword}
+                  className={NavBarStyle.loginpage_BoxContent_InputTag}
+                  onChange={(e) => handleChange(e, "confirmNewPassword")}
+                  required
+                  autoComplete="confirmNewPassword" // ✅ REQUIRED
+                />
+                <button
+                  type="button"
+                  className={FormStyles.toggle_visibility}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div
-            className={`${ButtonStyle.Button_Container} ${CustomStyle.button} `}
-          >
-            <button
-              className={ButtonStyle.Button_Container_content}
-              onClick={() => handleChangePassword()}
+            <div
+              className={`${ButtonStyle.Button_Container} ${CustomStyle.button} `}
             >
-              Submit
-            </button>
+              <button
+                type="submit"
+                className={ButtonStyle.Button_Container_content}
+                // onClick={() => handleChangePassword()}
+              >
+                Submit
+              </button>
+            </div>
           </div>
-        </div>
+        </form>
       </div>
     </>
   );

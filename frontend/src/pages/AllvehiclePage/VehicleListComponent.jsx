@@ -1,11 +1,18 @@
 import { useState } from "react";
 import VehiclePageStyle from "./Vehicle.module.css";
+import styles from "../bookingList/BookingList.module.css";
+
 import ButtonStyle from "../../Css/button.module.css";
-import { Server_API } from "../../APIPoints/AllApiPonts";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../ContextApi/ToastContext";
 
-import { Clock, ChevronRight, AlertCircle, Shield } from "lucide-react";
+import {
+  Clock,
+  ChevronRight,
+  AlertCircle,
+  Shield,
+  Calendar,
+} from "lucide-react";
 
 const VehicleListComponent = ({
   ListOfVehicle,
@@ -68,6 +75,13 @@ const VehicleListComponent = ({
     <>
       <div className={VehiclePageStyle.vehicle_rental_showcase}>
         <main className={VehiclePageStyle.main_container}>
+          {ListOfVehicle.length === 0 && (
+            <div className={styles.empty}>
+              <Calendar size={48} />
+              <h3>No Vehicles Found</h3>
+              <p>No vehicles match your current filter.</p>
+            </div>
+          )}
           <div className={VehiclePageStyle.vehicle_grid}>
             {ListOfVehicle &&
               ListOfVehicle.length > 0 &&
@@ -77,7 +91,7 @@ const VehicleListComponent = ({
                     <div className={VehiclePageStyle.vehicle_image_container}>
                       {elem.filePath && elem.filePath.length > 0 && (
                         <img
-                          src={`${Server_API}${elem.filePath[0]}`} // Prepend base URL to filePath
+                          src={elem.filePath[0]} // Prepend base URL to filePath
                           alt="VehicleImage"
                         />
                       )}

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-
 import axios from "axios";
-
 import { SocketProvider } from "../../ContextApi/NotificationContentAPI";
 import NavBar from "../navBar/NavBar";
 import AddVehicleDetails from "../../pages/addVehicle/AddVehicleDetails";
@@ -14,9 +12,8 @@ import BookingList from "../../pages/bookingList/BookingList";
 import ContactUsForm from "../../pages/contactUsPage/ContactUsForm";
 import Footer from "../../pages/footer/Footer";
 import LayoutStyle from "./layout.module.css";
-import { Server_API } from "./../../APIPoints/AllApiPonts";
 import AdminVehicleManagement from "./../../pages/vehicleManagementPage/AdminVehicleManagement";
-import AutoLogout from "../../forTokenExpery";
+// import AutoLogout from "../../forTokenExpery";
 
 import { useToast } from "../../ContextApi/ToastContext";
 import ForgotPaswswordPage from "./../forgotPassword/ForgotPaswswordPage";
@@ -25,120 +22,41 @@ import SignInPage from "./../signUpPage/SignInPage";
 import ChnagePassword from "./../forgotPassword/ChnagePassword";
 import ResetPasswordPage from "./../forgotPassword/ResetPasswordPage";
 import NotFoundPage from "../../errorPage/NotFoundPage";
+import { useSelector } from "react-redux";
+import MyProfile from "../navBar/MyProfile";
+import AdminDashboard from "../../pages/adminDashboard/AdminDashBoard";
+import AdminActionPage from "../../pages/alertPages/AdminActionPage";
+import AuditLogsList from "../../pages/adminDashboard/reportComponent/AuditLogsList";
 
 const Layout = () => {
-  const { handleShowToast } = useToast();
-
-  const [data, setData] = useState(null);
-
   // const userType = data?.userType;
-
   const [loading, setLoading] = useState(false);
 
   // Connect socket only when data._id exists
 
-  const handleLogin = async (loginValue) => {
-    setLoading(true); // Start loading state
-
-    try {
-      const response = await axios.post(
-        `${Server_API}/login`,
-        {
-          userId: loginValue.userId,
-          password: loginValue.password,
-        },
-        { withCredentials: true }
-      );
-
-      if (response.data?.user) {
-        setData(response.data.user); // Or response.data.data.user if that's your structure
-      }
-
-      handleShowToast("success", "Login successful");
-
-      return {
-        success: true,
-        message: "Login successful",
-      };
-    } catch (error) {
-      const ErrorMsg = error?.response?.data?.message;
-      handleShowToast("danger", ErrorMsg || "Login failed. Try again.");
-
-      return {
-        success: false,
-        message: error?.response?.data?.message || "Login failed. Try again.",
-      };
-    } finally {
-      setLoading(false); // Ensure loading is reset
-    }
-  };
-
-  const logout = async () => {
-    try {
-      const { data } = await axios.post(
-        `${Server_API}/logout`,
-        {},
-        { withCredentials: true }
-      );
-
-      handleShowToast("success", "Lougged out successfully");
-      if (data.message === "Logged out successfully") {
-        // setUserDetails(null);
-        window.location.href = "/";
-      }
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
-
-  const HandleCheckauth = async () => {
-    try {
-      const response = await axios.post(
-        `${Server_API}/checkAuth`,
-        {},
-        { withCredentials: true }
-      );
-
-      if (response.data?.data.user) {
-        setData(response.data.data.user);
-      }
-      setLoading(false);
-    } catch (error) {
-      if (error.response?.status !== 401) {
-        console.error(
-          "User is not authenticated:",
-          error.response?.data?.error || "No session found."
-        );
-      }
-      setData(null);
-    }
-  };
-
-  useEffect(() => {
-    HandleCheckauth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Get User Data
+  const { user } = useSelector((state) => state.login);
 
   return (
     <>
       {/* AutoLogout will now properly clear user data on session expiry */}
-      {data && <AutoLogout onLogout={logout} />}
       <div className={LayoutStyle.LayoutMain_Container}>
         <div className={LayoutStyle.LayoutMain_Content}>
-          <SocketProvider userData={data}>
+          <SocketProvider userData={user}>
             <>
               <div className={LayoutStyle.NavBar_Container}>
-                <NavBar loading={loading} userDetails={data} logout={logout} />
+                <NavBar loading={loading} />
               </div>
 
               <div className={LayoutStyle.Pages_Container}>
                 <Routes>
-                  <Route path="/" element={<HomePage userData={data} />} />
-                  <Route path="/otp" element={<OTPPage userData={data} />} />
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/otp" element={<OTPPage />} />
+                  <Route path="/profile" element={<MyProfile />} />
                   <Route
                     path="/addvehicle"
                     element={
-                      // userType === "admin" ? (
+                      // user.userType === "admin" ? (
                       <AddVehicleDetails />
                       // ) : (
                       //   <HomePage userData={data} />
@@ -149,30 +67,18 @@ const Layout = () => {
                     path="/filterVehicle"
                     element={<AllVehicleListpage />}
                   />
-                  <Route
-                    path="/booking"
-                    element={<VehicleBookingDetails userData={data} />}
-                  />
+                  <Route path="/booking" element={<VehicleBookingDetails />} />
                   <Route
                     path="/bookinglist"
-                    element={
-                      data ? (
-                        <BookingList userData={data} />
-                      ) : (
-                        <HomePage userData={data} />
-                      )
-                    }
+                    element={user ? <BookingList /> : <HomePage />}
                   />
-                  <Route
-                    path="/contactus"
-                    element={<ContactUsForm userData={data} />}
-                  />
+                  <Route path="/contactus" element={<ContactUsForm />} />
 
                   <Route
                     path="/vehicleManagement"
                     element={
-                      // userType === "admin" ? (
-                      <AdminVehicleManagement userData={data} />
+                      // user.userType === "admin" ? (
+                      <AdminVehicleManagement />
                       // ) : (
                       //   <HomePage userData={data} />
                       // )
@@ -185,7 +91,11 @@ const Layout = () => {
                   />
                   <Route
                     path="/login"
-                    element={<LoginPage handleLogin={handleLogin} />}
+                    element={
+                      <LoginPage
+                      // handleSendOtp={handleSendOtp}
+                      />
+                    }
                   />
                   <Route path="/signup" element={<SignInPage />} />
                   <Route path="/changepassword" element={<ChnagePassword />} />
@@ -193,7 +103,21 @@ const Layout = () => {
                     path="/reset-password"
                     element={<ResetPasswordPage />}
                   />
-                  <Route path="*" element={<NotFoundPage userData={data} />} />
+                  <Route
+                    path="/admin_dashboard"
+                    element={<AdminDashboard />}
+                  />
+                  <Route
+                    path="/audit_logs"
+                    element={<AuditLogsList />}
+                  />
+                  
+                  {/* ==== It inclde may pages like DLverifyPage.jsx , VehicleHandoverPage.jsx and it comes under adminDashboard.jsx */ }
+                  <Route
+                    path="/action"
+                    element={<AdminActionPage />}
+                  />
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </div>
             </>

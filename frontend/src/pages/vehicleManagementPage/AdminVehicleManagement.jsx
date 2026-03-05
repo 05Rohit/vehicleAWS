@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from "react";
 import VehicleManagementStyle from "./VehicleManagementPageStyle.module.css";
-
-import { Server_API } from "./../../APIPoints/AllApiPonts";
 import { useToast } from "../../ContextApi/ToastContext";
-
 import Box from "@mui/material/Box";
-
 import Modal from "@mui/material/Modal";
-
 import {
   Edit2,
   Trash2,
@@ -17,13 +12,23 @@ import {
   Gauge,
   IndianRupee,
   ChevronRight,
-  Menu,
-  X,
+  PanelLeftOpen,
+  PanelRightOpen,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SingleVehicleEditComponent from "./SingleVehicleEditComponent";
 import VechicleGroupUpadtesModel from "./VechicleGroupUpadtesModel";
-import api from "../../axiosInterceptors/AxiosSetup";
+import { useDispatch, useSelector } from "react-redux";
+import { getVehicleData } from "../../appRedux/redux/vehicleSlice/getvehicleSlice";
+import {
+  updateVehicleData,
+  resetUpdateVehicleState,
+} from "./../../appRedux/redux/vehicleSlice/updateVehicleSlice";
+import {
+  deleteVehicleData,
+  resetDeleteVehicleState,
+} from "./../../appRedux/redux/vehicleSlice/deletevehicleSlice";
+import NovehicleFoundPage from "../noVehicleFound/NovehicleFoundPage";
 
 const style = {
   position: "absolute",
@@ -54,13 +59,31 @@ const styleTwo = {
   border: "none",
   overflowY: "scroll",
   width: "90vw",
-  p: 4,
+  paddingTop: 2,
+  paddingBottom: 4,
+  paddingLeft: 2,
+  paddingRight: 2,
+  borderRadius: 4,
+  scrollbarWidth: "thin",
+  scrollbarColor: "#8e9cf2 #e0e0e0",
 };
 
 const AdminVehicleManagement = () => {
   const { handleShowToast } = useToast();
   const navigate = useNavigate();
 
+  const dispatch = useDispatch();
+  /* ===== Redux Store Values and getbthe whole List ===== */
+  const { vehicleList } = useSelector((state) => state.vehicleList);
+  /* ===== Redux Store Values for Update Vehicle ===== */
+  const { updateVehicleLoading } = useSelector((state) => state.updateVehicle);
+
+  /*  ==== Fetch Vehicle Data on Component Mount ======= */
+  useEffect(() => {
+    dispatch(getVehicleData());
+  }, [dispatch]);
+
+  // ===== Modal State for Single Vehicle Edit/Update/Delete =====
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -68,13 +91,43 @@ const AdminVehicleManagement = () => {
   const handleGroupOpen = () => setGroupOpen(true);
   const handleGroupClose = () => setGroupOpen(false);
 
-  const [ListOfVehicle, setListOfVehicle] = useState([]);
-
+  // ===== State for Selected Vehicle Group and Filters =====
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
+  // Filter States
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [locationFilter, setLocationFilter] = useState("All");
+  //Open and close of the sidebar
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const SidebarIcon = sidebarOpen ? PanelRightOpen : PanelLeftOpen;
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+
+    // Run once on mount
+    handleResize();
+
+    // Listen to resize
+    window.addEventListener("resize", handleResize);
+
+    // 🧹 Cleanup
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleEsc = (e) =>
+      e.key === "Escape" && setSidebarOpen((prev) => !prev);
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
   const [OneVehicleData, setOneVehicleData] = useState({
     location: "",
@@ -85,26 +138,15 @@ const AdminVehicleManagement = () => {
     uniqueVehicleId: "",
   });
 
-  const handleGetAllVehicleList = async () => {
-    const response = await api.get(`${Server_API}/getallvehicle`, {
-      withCredentials: true,
-    });
-
-    setListOfVehicle(response.data.data);
-  };
-
-  useEffect(() => {
-    handleGetAllVehicleList();
-  }, []);
-
-  if (!ListOfVehicle || ListOfVehicle.length === 0) {
+  if (!vehicleList || vehicleList.length === 0) {
     return (
       <div style={{ width: "100%", height: "100%" }}>
-        <p>No data</p>
+        <NovehicleFoundPage />
       </div>
     );
   }
 
+  /*  ====== Handle Edit Single Vehicle of The Group ======== */
   const handleEditEachVehicle = (vehicleData) => {
     handleOpen();
     setOneVehicleData({
@@ -117,149 +159,161 @@ const AdminVehicleManagement = () => {
     });
   };
 
-  /*Handle Delete Single Vehicle of The Group */
-  const handleDeleteVehicle = async (vehicleId) => {
-    try {
-      await api.delete(`${Server_API}/deletevehicle/${vehicleId}`, {
-        withCredentials: true,
-      });
-
-      handleShowToast("success", "Vehicle deleted successfully");
-      handleGetAllVehicleList();
-    } catch (error) {
-
-      const ErrMessage =
-        error.response?.data?.error || "Failed to delete vehicle";
-      handleShowToast("danger", ErrMessage);
-    }
-  };
-  /*Handle Update Single Vehicle of The Group */
+  /*  ========= Handle Update Single Vehicle of The Group======== */
   const handleUpdateVehicleData = async (vehicleId) => {
     try {
-      await api.patch(
-        `${Server_API}/updatevehicle/${vehicleId}`,
-        OneVehicleData,
-        {
-          withCredentials: true,
-        }
-      );
-      handleShowToast("success", "Vehicle data updated successfully");
+      const res = await dispatch(
+        updateVehicleData({ id: vehicleId, vehicleData: OneVehicleData })
+      ).unwrap();
+
+      handleShowToast("success", res);
+
+      // 🔄 Refresh the vehicle list after update
+      dispatch(getVehicleData());
+
       handleClose();
-      handleGetAllVehicleList();
+      dispatch(resetUpdateVehicleState());
     } catch (error) {
-      const ErrMessage =
-        error.response?.data?.error || "Failed to update vehicle";
-      handleShowToast("danger", ErrMessage);
-      handleGetAllVehicleList();
+      handleShowToast("danger", error);
+      dispatch(resetUpdateVehicleState());
+    }
+  };
+  /* ========= Handle Delete Single Vehicle of The Group ============= */
+  const handleDeleteVehicle = async (vehicleId) => {
+    try {
+      const res = await dispatch(deleteVehicleData(vehicleId)).unwrap();
+
+      handleShowToast("success", res);
+
+      // 🔄 Refresh the vehicle list after update
+      dispatch(getVehicleData());
+      handleClose();
+      dispatch(resetDeleteVehicleState());
+    } catch (error) {
+      handleShowToast("danger", error);
+      dispatch(resetDeleteVehicleState());
     }
   };
 
-  const selectedGroup = ListOfVehicle[selectedGroupIndex];
+  // ==== Get the selected vehicle group
+  const selectedGroup = vehicleList[selectedGroupIndex];
+  // ==== Filter vehicles based on search term, status, and location
+  const filteredVehicles = selectedGroup?.specificVehicleDetails?.filter(
+    (v) => {
+      const matchesSearch =
+        v.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        v.uniqueVehicleId.toString().includes(searchTerm);
+      const matchesStatus =
+        statusFilter === "All" ||
+        (statusFilter === "Available" &&
+          v.vehicleStatus &&
+          v.bookedPeriods.length === 0) ||
+        (statusFilter === "Booked" && v.bookedPeriods.length > 0) ||
+        (statusFilter === "Unavailable" && !v.vehicleStatus);
+      const matchesLocation =
+        locationFilter === "All" || v.location === locationFilter;
+      return matchesSearch && matchesStatus && matchesLocation;
+    }
+  );
 
-  const filteredVehicles = selectedGroup.specificVehicleDetails.filter((v) => {
-    const matchesSearch =
-      v.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      v.uniqueVehicleId.toString().includes(searchTerm);
-    const matchesStatus =
-      statusFilter === "All" ||
-      (statusFilter === "Available" &&
-        v.vehicleStatus &&
-        v.bookedPeriods.length === 0) ||
-      (statusFilter === "Booked" && v.bookedPeriods.length > 0) ||
-      (statusFilter === "Unavailable" && !v.vehicleStatus);
-    const matchesLocation =
-      locationFilter === "All" || v.location === locationFilter;
-    return matchesSearch && matchesStatus && matchesLocation;
-  });
-
+  // ===== Function to get vehicle status text and color =====
   const getVehicleStatus = (vehicle) => {
     if (!vehicle.vehicleStatus)
-      return { text: "Unavailable", color: VehicleManagementStyle.status_unavailable };
+      return {
+        text: "Unavailable",
+        color: VehicleManagementStyle.status_unavailable,
+      };
     if (vehicle.bookedPeriods.length > 0)
-      return { text: "Booked", color: VehicleManagementStyle.status_booked};
-    return { text: "Available", color: VehicleManagementStyle.status_available};
+      return { text: "Booked", color: VehicleManagementStyle.status_booked };
+    return {
+      text: "Available",
+      color: VehicleManagementStyle.status_available,
+    };
   };
 
-  const availableCount = selectedGroup.specificVehicleDetails.filter(
+  // ===== Calculate vehicle stats  based on there Status =====
+  const availableCount = selectedGroup?.specificVehicleDetails?.filter(
     (v) => v.vehicleStatus && v.bookedPeriods.length === 0
   ).length;
-  const bookedCount = selectedGroup.specificVehicleDetails.filter(
+  const bookedCount = selectedGroup?.specificVehicleDetails?.filter(
     (v) => v.bookedPeriods.length > 0
   ).length;
-  const unavailableCount = selectedGroup.specificVehicleDetails.filter(
+  const unavailableCount = selectedGroup?.specificVehicleDetails?.filter(
     (v) => !v.vehicleStatus
   ).length;
   const uniqueLocations = [
-    ...new Set(selectedGroup.specificVehicleDetails.map((v) => v.location)),
+    ...new Set(selectedGroup?.specificVehicleDetails?.map((v) => v.location)),
   ];
 
   return (
     <>
-      <div
-        className={`${VehicleManagementStyle.vehicle_management} ${
-          sidebarOpen ? "sidebar-open" : "sidebar-closed"
-        }`}
-      >
+      <div className={VehicleManagementStyle.vehicle_management}>
         {/* Sidebar */}
-        <aside className={VehicleManagementStyle.sidebar}>
-          <div className={VehicleManagementStyle.sidebar_header}>
-            <p className={VehicleManagementStyle.sidebar_header_title}>
-              Vehicle Groups
-            </p>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className={VehicleManagementStyle.close_sidebar}
-            >
-              <X size={20} />
-            </button>
-          </div>
-          <div className={VehicleManagementStyle.sidebar_list}>
-            {ListOfVehicle.map((group, index) => {
-              const isSelected = selectedGroupIndex === index;
-              return (
-                <button
-                  key={group.uniqueGroupId}
-                  onClick={() => setSelectedGroupIndex(index)}
-                  className={`${VehicleManagementStyle.group_item} ${
-                    isSelected ? `${VehicleManagementStyle.selected}` : ""
-                  }`}
-                >
-                  <div className={VehicleManagementStyle.group_info_container}>
-                    <div className={VehicleManagementStyle.group_info}>
-                      <h3>{group.name}</h3>
-                      <div className={VehicleManagementStyle.group_meta}>
-                        <span>{group.vehicleType}</span>
-                        <span>{group.model}</span>
+
+        <div className={VehicleManagementStyle.sidebar_container}>
+          <aside
+            className={`${VehicleManagementStyle.sidebar} ${
+              sidebarOpen
+                ? VehicleManagementStyle.sidebar_open
+                : VehicleManagementStyle.sidebar_closed
+            }`}
+          >
+            <div className={VehicleManagementStyle.sideBar_content}>
+              <div className={VehicleManagementStyle.sidebar_header}>
+                <p className={VehicleManagementStyle.sidebar_header_title}>
+                  Vehicle Groups
+                </p>
+              </div>
+
+              <div className={VehicleManagementStyle.sidebar_list}>
+                {vehicleList.map((group, index) => {
+                  const isSelected = selectedGroupIndex === index;
+                  return (
+                    <button
+                      key={group.uniqueGroupId}
+                      onClick={() => setSelectedGroupIndex(index)}
+                      className={`${VehicleManagementStyle.group_item} ${
+                        isSelected ? VehicleManagementStyle.selected : ""
+                      }`}
+                    >
+                      <div className={VehicleManagementStyle.group_info}>
+                        <h4>{group.name}</h4>
+                        <div className={VehicleManagementStyle.group_meta}>
+                          <span>{group.vehicleType}</span>
+                          <span>{group.model}</span>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  <div
-                    className={VehicleManagementStyle.group_item_right_arrow}
-                  >
-                    {" "}
-                    {isSelected && <ChevronRight size={18} />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </aside>
+
+                      {isSelected && <ChevronRight size={18} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Toggle Button */}
+          </aside>
+
+          <button
+            onClick={() => setSidebarOpen((prev) => !prev)}
+            className={`${VehicleManagementStyle.MenuBtnContent} ${
+              sidebarOpen
+                ? VehicleManagementStyle.MenuBtnContent_open
+                : VehicleManagementStyle.MenuBtnContent_closed
+            } `}
+            aria-label="Toggle Sidebar"
+          >
+            <SidebarIcon />
+          </button>
+        </div>
 
         {/* Main content */}
         <main className={VehicleManagementStyle.main_content}>
           {/* Header */}
           <header className={VehicleManagementStyle.header}>
-            {!sidebarOpen && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className={VehicleManagementStyle.open_sidebar}
-              >
-                <Menu size={20} />
-              </button>
-            )}
             <div className={VehicleManagementStyle.header_container}>
               <div className={VehicleManagementStyle.header_title}>
-                <h1>{selectedGroup.name}</h1>
+                <h3>{selectedGroup?.name}</h3>
               </div>
               <div className={VehicleManagementStyle.btnContainer}>
                 <button
@@ -283,7 +337,7 @@ const AdminVehicleManagement = () => {
             <p
               className={`${VehicleManagementStyle.card} ${VehicleManagementStyle.total}`}
             >
-              Total Vehicles: {selectedGroup.specificVehicleDetails.length}
+              Total Vehicles: {selectedGroup?.specificVehicleDetails?.length}
             </p>
             <p
               className={`${VehicleManagementStyle.card} ${VehicleManagementStyle.available}`}
@@ -308,13 +362,13 @@ const AdminVehicleManagement = () => {
               <IndianRupee size={14} /> Booking Price Tiers
             </h4>
             <div className={VehicleManagementStyle.pricing_grid}>
-              {selectedGroup.bookingPrice.map((price, idx) => (
+              {selectedGroup?.bookingPrice?.map((price, idx) => (
                 <div key={idx} className={VehicleManagementStyle.price_card}>
                   <p className={VehicleManagementStyle.price}>
-                    {price.price}&#8377; / {price.range} km
+                    {price?.price}&#8377; / {price?.range} km
                   </p>
                   <p className={VehicleManagementStyle.per_km}>
-                    {(price.price / price.range).toFixed(2)}&#8377; per km
+                    {(price?.price / price?.range).toFixed(2)}&#8377; per km
                   </p>
                 </div>
               ))}
@@ -342,7 +396,7 @@ const AdminVehicleManagement = () => {
               onChange={(e) => setLocationFilter(e.target.value)}
             >
               <option>All</option>
-              {uniqueLocations.map((loc) => (
+              {uniqueLocations?.map((loc) => (
                 <option key={loc}>{loc}</option>
               ))}
             </select>
@@ -350,25 +404,32 @@ const AdminVehicleManagement = () => {
 
           {/* Vehicle Grid */}
           <section className={VehicleManagementStyle.vehicle_grid}>
-            {filteredVehicles.length === 0 && (
-              <p className={VehicleManagementStyle.no_vehicles}>
-                No vehicles found matching your criteria
-              </p>
-            )}
-            {filteredVehicles.map((vehicle) => {
+            {filteredVehicles?.length === 0 && <NovehicleFoundPage />}
+            {filteredVehicles?.map((vehicle) => {
               const status = getVehicleStatus(vehicle);
               return (
                 <div
                   key={vehicle.uniqueVehicleId}
                   className={VehicleManagementStyle.vehicle_card}
                 >
-                  <div>
+                  <div
+                    className={`${VehicleManagementStyle.vehicle_header} ${status.color}`}
+                  >
+                    <p>{vehicle.vehicleNumber}</p>
+                    <span>{status.text}</span>
+                  </div>
+                  <div className={VehicleManagementStyle.vehicle_body}>
                     <div
-                      className={`${VehicleManagementStyle.vehicle_header} ${status.color}`}
+                      className={VehicleManagementStyle.vehicle_image_container}
                     >
-                      <p>{vehicle.vehicleNumber}</p>
-
-                      <span>{status.text}</span>
+                      {" "}
+                      {selectedGroup.filePath &&
+                        selectedGroup.filePath.length > 0 && (
+                          <img
+                            src={selectedGroup.filePath[0]} // Prepend base URL to filePath
+                            alt="VehicleImage"
+                          />
+                        )}
                     </div>
                     <div className={VehicleManagementStyle.vehicle_details}>
                       <p>Vehicle Model: {selectedGroup.model}</p>
@@ -376,7 +437,7 @@ const AdminVehicleManagement = () => {
                         <MapPin size={14} /> {vehicle.location}
                       </p>
                       <p>
-                        <Gauge size={14} /> {vehicle.vehicleMilage} km
+                        <Gauge size={14} /> {vehicle.vehicleMilage} km / Litre
                       </p>
                       {vehicle.bookedPeriods.length > 0 && (
                         <div className={VehicleManagementStyle.booked_periods}>
@@ -427,6 +488,7 @@ const AdminVehicleManagement = () => {
             data={OneVehicleData}
             onChange={setOneVehicleData}
             submit={handleUpdateVehicleData}
+            updateVehicleLoading={updateVehicleLoading}
           />
         </Box>
       </Modal>
@@ -443,7 +505,7 @@ const AdminVehicleManagement = () => {
           <VechicleGroupUpadtesModel
             selectedGroup={selectedGroup}
             handleGroupClose={handleGroupClose}
-            handleGetAllVehicleList={handleGetAllVehicleList}
+            handleGetAllVehicleList={vehicleList}
           />
         </Box>
       </Modal>

@@ -13,7 +13,12 @@ import {
   Edit2,
 } from "lucide-react";
 
-const SingleVehicleEditComponent = ({ data, onChange, submit }) => {
+const SingleVehicleEditComponent = ({
+  data,
+  onChange,
+  submit,
+  updateVehicleLoading,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const status = data.vehicleStatus;
   const [showVehicleStatus, setShowVehicleStatus] = useState(status);
@@ -22,7 +27,6 @@ const SingleVehicleEditComponent = ({ data, onChange, submit }) => {
     const { value, name } = e.target;
     const parsedValue = value === "true"; // Convert string → boolean
 
-
     if (name === "vehicleStatus") {
       setShowVehicleStatus(parsedValue);
       onChange({ ...data, [name]: parsedValue }); // ✅ use boolean
@@ -30,7 +34,6 @@ const SingleVehicleEditComponent = ({ data, onChange, submit }) => {
       onChange({ ...data, [name]: value });
     }
   };
-
 
   const handleCancel = () => {
     setIsEditing(false);
@@ -118,7 +121,9 @@ const SingleVehicleEditComponent = ({ data, onChange, submit }) => {
             <label>
               <CheckCircle size={16} /> Vehicle Status
             </label>
-            <div className={`${ButtonStyle.Button_Container} ${CustomStyle.actionButtons}`}>
+            <div
+              className={`${ButtonStyle.Button_Container} ${CustomStyle.actionButtons}`}
+            >
               <button
                 type="button"
                 name="vehicleStatus"
@@ -148,7 +153,7 @@ const SingleVehicleEditComponent = ({ data, onChange, submit }) => {
           </div>
 
           {/* Not Available Reason */}
-          {(isEditing && showVehicleStatus===false) && (
+          {isEditing && showVehicleStatus === false && (
             <div className={`${CustomStyle.reasonBox} ${FormStyle.form_group}`}>
               <label>
                 <AlertCircle size={16} /> Reason for Unavailability
@@ -156,11 +161,11 @@ const SingleVehicleEditComponent = ({ data, onChange, submit }) => {
               <textarea
                 name="notAvailableReason"
                 id="notAvailableReason"
-                value={data.notAvailableReason? data.notAvailableReason : ""}
+                value={data.notAvailableReason ? data.notAvailableReason : ""}
                 onChange={(e) => handleInputChange(e)}
                 disabled={!isEditing}
                 className={`${CustomStyle.textarea} ${
-                  (isEditing && showVehicleStatus===false)
+                  isEditing && showVehicleStatus === false
                     ? CustomStyle.textareaActive
                     : CustomStyle.textareaDisabled
                 }`}
@@ -172,13 +177,25 @@ const SingleVehicleEditComponent = ({ data, onChange, submit }) => {
 
           {/* Action Buttons */}
           {isEditing && (
-            <div className={`${ButtonStyle.Button_Container} ${CustomStyle.actionButtons}`}>
+            <div
+              className={`${ButtonStyle.Button_Container} ${CustomStyle.actionButtons}`}
+            >
               <button
                 onClick={() => submit(data.uniqueVehicleId)}
                 className={CustomStyle.saveButton}
+                disabled={updateVehicleLoading} // <-- controls disable
               >
-                <Save /> Save Changes
+                {updateVehicleLoading ? (
+                  <>
+                    <Save style={{ opacity: 0.5 }} /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save /> Save Changes
+                  </>
+                )}
               </button>
+
               <button
                 onClick={handleCancel}
                 className={CustomStyle.cancelButton}

@@ -291,7 +291,6 @@
   gap: 0.5rem;
   font-size: 0.75rem;
   color: rgb(79, 82, 88);
-
 }
 
 .badge {
@@ -351,39 +350,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.profileInfo {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.profileAvatar {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #d97706, #b45309);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.userIcon {
-  width: 2rem;
-  height: 2rem;
-  color: white;
-}
-
-.userName {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.userEmail {
-  font-size: 0.875rem;
-  color: #6b7280;
 }
 
 /* Dropdown */
@@ -473,8 +439,8 @@
 }
 
 .dropdownHeader {
-  background: linear-gradient(to right, #f9f0e6, #faf4d9);
-  padding: 0.5rem 1.5rem;
+  background-color: white;
+  padding: 0.5rem 1rem;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
   gap: 0.4rem;
@@ -486,9 +452,11 @@
 }
 
 .welcomeName {
-  color: #111827;
-  font-weight: 700;
-  font-size: 1.125rem;
+  color: #25272b;
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: 1px;
+  margin-left: 0.2rem;
 }
 
 .menuList {
@@ -554,6 +522,9 @@
 
 .textRed {
   color: #dc2626;
+}
+.textOrange {
+  color: #ec772f;
 }
 
 .menuLabel {

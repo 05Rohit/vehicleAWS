@@ -6,7 +6,10 @@
       "image": "frontend",
       "essential": true,
       "portMappings": [
-        { "containerPort": 3000, "hostPort": 3000 }
+        {
+          "containerPort": 3000,
+          "hostPort": 3000
+        }
       ]
     },
     {
@@ -14,7 +17,10 @@
       "image": "backend",
       "essential": true,
       "portMappings": [
-        { "containerPort": 5000, "hostPort": 5000 }
+        {
+          "containerPort": 5000,
+          "hostPort": 5000
+        }
       ]
     },
     {
@@ -22,9 +28,19 @@
       "image": "rabbitmq:3-management",
       "essential": false,
       "portMappings": [
-        { "containerPort": 5672, "hostPort": 5672 },
-        { "containerPort": 15672, "hostPort": 15672 }
+        {
+          "containerPort": 5672,
+          "hostPort": 5672
+        },
+        {
+          "containerPort": 15672,
+          "hostPort": 15672
+        }
       ]
     }
   ]
 }
+
+
+
+

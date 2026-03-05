@@ -3,7 +3,7 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const logger = require("../utils/logger");
 
-// 🟢 Create Notification
+// 🟢 Create Notification for events
 exports.createNotification = catchAsync(async (req, res, next) => {
   const { notificationId, userId, rolename, message, title, type } = req.body;
 
@@ -20,7 +20,7 @@ exports.createNotification = catchAsync(async (req, res, next) => {
     type,
   });
 
-  logger.info(`Notification created for user ${userId}`);
+  // logger.info(`Notification created for user ${userId}`);
 
   res.status(201).json({
     status: "success",
@@ -28,16 +28,15 @@ exports.createNotification = catchAsync(async (req, res, next) => {
   });
 });
 
-
 // 🟢 Get Notifications for a user
 exports.getNotifications = catchAsync(async (req, res, next) => {
-  const userId = req.user?._id;
+  const userId = req.user?.id;
+  // logger.info(`Fetching notifications for user ID: ${userId}`);
 
   if (!userId) {
     return next(new AppError("Login is required", 400));
   }
 
-  // ❌ FIXED: Mongoose doesn't have `.toArray()`, use `.lean()` for performance
   const notifications = await Notification.find({ userId })
     .sort({ isRead: 1, createdAt: -1 })
     .lean();
@@ -60,10 +59,9 @@ exports.getNotifications = catchAsync(async (req, res, next) => {
   });
 });
 
-
 // 🟢 Mark a single notification as read/unread
 exports.handleReadNotifications = catchAsync(async (req, res, next) => {
-  const userId = req.user?._id;
+  const userId = req.user?.id;
   const { notificationId, isRead = true } = req.body;
 
   if (!notificationId) {
@@ -90,10 +88,9 @@ exports.handleReadNotifications = catchAsync(async (req, res, next) => {
   });
 });
 
-
 // 🟢 Mark all notifications as read/unread
 exports.handleReadAllNotifications = catchAsync(async (req, res, next) => {
-  const userId = req.user?._id;
+  const userId = req.user?.id;
   const { isRead = true } = req.body;
 
   if (!userId) {
@@ -107,6 +104,8 @@ exports.handleReadAllNotifications = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    message: `${result.modifiedCount} notifications marked as ${isRead ? "read" : "unread"}.`,
+    message: `${result.modifiedCount} notifications marked as ${
+      isRead ? "read" : "unread"
+    }.`,
   });
 });

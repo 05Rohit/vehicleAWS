@@ -1,87 +1,115 @@
-import React, { useState } from "react";
-import { Bell, User, Lock, Calendar, LogOut, ChevronDown } from "lucide-react";
-import styles from "./ProfileDropdown.module.css";
+import { useEffect } from "react";
+import { ChevronDown } from "lucide-react";
+import NavBarStyle from "./NavBar.module.css";
 
-const ProfileDropdown = () => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [notifications, setNotifications] = useState(1);
+const ProfileDropdown = ({
+  loading,
+  user,
+  isOpen,
+  setIsOpen,
+  profileRef,
+  menuItems,
+  handleNavigate,
+}) => {
+  /* ================= Click Outside + ESC ================= */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
 
-  const menuItems = [
-    { icon: Lock, label: "Change Password", color: styles.textGray },
-    { icon: Calendar, label: "Bookings", color: styles.textGray },
-    { icon: LogOut, label: "Logout", color: styles.textRed },
-  ];
+    const handleEsc = (event) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEsc);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [isOpen, profileRef, setIsOpen]);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.wrapper}>
-        {/* Header Section */}
-        <div className={styles.headerCard}>
-          <div className={styles.headerFlex}>
-            <div className={styles.profileInfo}>
-              <div className={styles.profileAvatar}>
-                <User className={styles.userIcon} />
-              </div>
-              <div>
-                <h1 className={styles.userName}>Rohit Singh</h1>
-                <p className={styles.userEmail}>rohitkumar791975@gmail.com</p>
-              </div>
-            </div>
-
-            {/* Profile Button with Dropdown */}
-            <div className={styles.dropdownWrapper}>
+    <div
+      className={NavBarStyle.navbarpage_Content_Profile_Box}
+      ref={profileRef}
+    >
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          {!user?.email ? (
+            <div className={NavBarStyle.navbarpage_Content_Boxes}>
               <button
-                onClick={() => setIsOpen(!isOpen)}
-                className={styles.profileButton}
+                onClick={() => handleNavigate("/login")}
+                className={NavBarStyle.LoginButton}
               >
-                <div className={styles.bellWrapper}>
-                  <Bell className={styles.bellIcon} />
-                  {notifications > 0 && (
-                    <span className={styles.notificationBadge}>
-                      {notifications}
-                    </span>
-                  )}
-                </div>
+                LogIn
+              </button>
+            </div>
+          ) : (
+            <div className={NavBarStyle.dropdownWrapper}>
+              <button
+                onClick={() => setIsOpen((prev) => !prev)}
+                className={NavBarStyle.profileButton}
+              >
                 Profile
                 <ChevronDown
-                  className={`${styles.chevronIcon} ${
-                    isOpen ? styles.chevronRotate : ""
+                  className={`${NavBarStyle.chevronIcon} ${
+                    isOpen ? NavBarStyle.chevronRotate : ""
                   }`}
                 />
               </button>
 
               {isOpen && (
-                <div className={styles.dropdownMenu}>
-                  <div className={styles.dropdownHeader}>
-                    <p className={styles.welcomeText}>Welcome :</p>
-                    <p className={styles.welcomeName}>Rohit Singh</p>
+                <div className={NavBarStyle.dropdownMenu}>
+                  {/* Header */}
+                  <div className={NavBarStyle.dropdownHeader}>
+                    <p className={NavBarStyle.welcomeText}>Welcome :</p>
+                    <p className={NavBarStyle.welcomeName}>{user?.name}</p>
                   </div>
 
-                  <div className={styles.menuList}>
+                  {/* Menu */}
+                  <div className={NavBarStyle.menuList}>
                     {menuItems.map((item, index) => (
                       <button
                         key={index}
-                        className={`${styles.menuItem} ${
-                          item.label === "Logout" ? styles.logoutBorder : ""
+                        onClick={() => {
+                          item.onClick();
+                          setIsOpen(false); // ✅ close after click
+                        }}
+                        className={`${NavBarStyle.menuItem} ${
+                          item.label === "Logout"
+                            ? NavBarStyle.logoutBorder
+                            : ""
                         }`}
                       >
                         <div
-                          className={`${styles.menuIconWrapper} ${
+                          className={`${NavBarStyle.menuIconWrapper} ${
                             item.label === "Logout"
-                              ? styles.bgRedLight
-                              : styles.bgBlueLight
+                              ? NavBarStyle.bgRedLight
+                              : NavBarStyle.bgBlueLight
                           }`}
                         >
                           <item.icon
-                            className={`${styles.menuIcon} ${
+                            size={16}
+                            className={`${NavBarStyle.menuIcon} ${
                               item.label === "Logout"
-                                ? styles.textRed
-                                : styles.textBlue
+                                ? NavBarStyle.textRed
+                                : NavBarStyle.textBlue
                             }`}
                           />
                         </div>
+
                         <span
-                          className={`${styles.menuLabel} ${item.color}`}
+                          className={`${NavBarStyle.menuLabel} ${item.color}`}
                         >
                           {item.label}
                         </span>
@@ -89,76 +117,13 @@ const ProfileDropdown = () => {
                     ))}
                   </div>
 
-                  <div className={styles.dropdownBottom}></div>
+                  <div className={NavBarStyle.dropdownBottom} />
                 </div>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Dashboard Cards */}
-        <div className={styles.cardGrid}>
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h3 className={styles.cardTitle}>Active Bookings</h3>
-              <div className={`${styles.iconBox} ${styles.bgBlueLight}`}>
-                <Calendar className={styles.textBlue} />
-              </div>
-            </div>
-            <p className={`${styles.cardNumber} ${styles.textBlue}`}>3</p>
-            <p className={styles.cardSubtitle}>Current rentals</p>
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h3 className={styles.cardTitle}>Total Spent</h3>
-              <div className={`${styles.iconBox} ${styles.bgGreenLight}`}>
-                <span className={`${styles.currencySymbol} ${styles.textGreen}`}>
-                  ₹
-                </span>
-              </div>
-            </div>
-            <p className={`${styles.cardNumber} ${styles.textGreen}`}>₹1,770</p>
-            <p className={styles.cardSubtitle}>This month</p>
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h3 className={styles.cardTitle}>Notifications</h3>
-              <div className={`${styles.iconBox} ${styles.bgOrangeLight}`}>
-                <Bell className={styles.textOrange} />
-              </div>
-            </div>
-            <p className={`${styles.cardNumber} ${styles.textOrange}`}>
-              {notifications}
-            </p>
-            <p className={styles.cardSubtitle}>Unread messages</p>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className={styles.quickActions}>
-          <h2 className={styles.quickTitle}>Quick Actions</h2>
-          <div className={styles.quickGrid}>
-            <button className={`${styles.quickBtn} ${styles.bgBlueLight}`}>
-              <Calendar className={`${styles.quickIcon} ${styles.textBlue}`} />
-              <p className={styles.quickLabel}>New Booking</p>
-            </button>
-            <button className={`${styles.quickBtn} ${styles.bgGreenLight}`}>
-              <Lock className={`${styles.quickIcon} ${styles.textGreen}`} />
-              <p className={styles.quickLabel}>Security</p>
-            </button>
-            <button className={`${styles.quickBtn} ${styles.bgPurpleLight}`}>
-              <User className={`${styles.quickIcon} ${styles.textPurple}`} />
-              <p className={styles.quickLabel}>Profile</p>
-            </button>
-            <button className={`${styles.quickBtn} ${styles.bgOrangeLight}`}>
-              <Bell className={`${styles.quickIcon} ${styles.textOrange}`} />
-              <p className={styles.quickLabel}>Alerts</p>
-            </button>
-          </div>
-        </div>
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

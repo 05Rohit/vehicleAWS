@@ -288,3 +288,8 @@
 .cancelButton {
   background: linear-gradient(90deg, #f34b4b, #f71f1f);
 }
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #b0b0b0; /* Optional dull color */
+}

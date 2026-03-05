@@ -23,7 +23,7 @@
 /* Vehicle Card */
 .vehicle_card {
   width: 100%;
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   padding: 1rem 1.5rem;
@@ -45,7 +45,7 @@
   border-radius: 0.5rem;
   background: transparent;
   margin: auto;
-  width: 265px;
+  width: 100%;
   height: 180px;
 }
 .vehicle_image_container img {

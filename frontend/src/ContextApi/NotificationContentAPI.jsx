@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { Notification_Server_API } from "../APIPoints/AllApiPonts";
 
 const SocketContext = createContext();
 
-const SOCKET_URL = "https://vehicleaws-messagebroker.onrender.com/"; // 🔁 replace with your backend URL
+const SOCKET_URL = Notification_Server_API; 
+
 
 export const SocketProvider = ({ userData, children }) => {
+
   const [socket, setSocket] = useState(null);
   const [notifications, setNotifications] = useState([]);
 
@@ -21,19 +24,18 @@ export const SocketProvider = ({ userData, children }) => {
     // when connected, register user/admin
     newSocket.on("connect", () => {
       // console.log("✅ Connected to Socket.IO server");
-
+console.log("user",userData?.userType)
       if (userData?.userType === "admin") {
         // console.log("User Admin:", userData);
         newSocket.emit("register_admin");
       } else if (userData?.id) {
-        // console.log("User:", userData);
         newSocket.emit("register_user", userData.id);
       }
     });
 
     // listen for notifications
     newSocket.on("new_notification", (data) => {
-      // console.log("🔔 New notification:", data);
+      console.log("🔔 New notification:", data);
       setNotifications((prev) => [data, ...prev]);
     });
 

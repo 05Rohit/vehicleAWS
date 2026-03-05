@@ -7,12 +7,16 @@ const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      trim: true,
+
+      required: [true, "Name is required"],
     },
     email: {
       type: String,
       unique: true,
       required: [true, "Email address is required"],
+      trim: true,
+
       lowercase: true,
       validate: {
         validator: function (v) {
@@ -23,11 +27,14 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      trim: true,
       required: [true, "Password is required"],
       minlength: 6,
     },
     phoneNumber: {
       type: String,
+      trim: true,
+
       required: [true, "Phone number is required"],
       validate: {
         validator: function (v) {
@@ -39,14 +46,32 @@ const UserSchema = new mongoose.Schema(
     },
     drivingLicenceNumber: {
       type: String,
+      unique:true,
+      trim: true,
+    },
+    isDLverify: {
+      type: Boolean,
+      default:false
+    },
+    drivingLicenceFilePath: {
+      type: [String], // 👈 array
+      default: [],
+    },
+    currentLocation: {
+      type: String,
+      trim: true,
+      default: "Bengaluru",
     },
     userType: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
+      trim: true,
     },
     altMobileNumber: {
       type: String,
+      trim: true,
+
       default: null,
       validate: {
         validator: function (v) {
@@ -69,9 +94,42 @@ const UserSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    otp: {
+      type: Number,
+      default: null,
+    },
+    otpExpiry: {
+      type: Date,
+      default: null,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    bookingInfo: {
+      totalBooking: {
+        type: Number,
+        default: 0,
+      },
+      cancelbooking: {
+        type: Number,
+        default: 0,
+      },
+
+      activeBooking: {
+        type: Number,
+        default: 0,
+      },
+      moneySpend: {
+        type: Number,
+        default: 0,
+      },
+    },
   },
   { timestamps: true }
 );
+UserSchema.index({ isDLverify: 1, createdAt: -1 });
+
 
 // ✅ Pre-save hook to hash password
 UserSchema.pre("save", async function (next) {

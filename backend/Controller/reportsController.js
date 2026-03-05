@@ -6,104 +6,96 @@ const vehicleBookingModel = require("../model/vehicleBookingModel");
 const vehicleModel = require("../model/vehicleDetailModel");
 
 exports.getBookingData = catchAsync(async (req, res, next) => {
-  const { bookingStatus } = req.body; // or req.query for GET requests
-  const allBookings = await vehicleBookingModel.find({});
-  const matchedBookings = [];
+  const { bookingStatus } = req.query; // ✅ Use query for filtering
 
-  allBookings.forEach((doc) => {
-    const filteredVehicles = doc.vehicleDetails.filter((v) =>
-      bookingStatus ? v.bookingStatus === bookingStatus : true
-    );
-    // Console,=.liog(filteredVehicles);
+  const matchStage = bookingStatus
+    ? { "vehicleDetails.bookingStatus": bookingStatus }
+    : {};
 
-    filteredVehicles.forEach((vehicle) => {
-      matchedBookings.push({
-        _id: doc._id,
-        userEmail: doc.userEmail || null,
+  const data = await vehicleBookingModel.aggregate([
+    { $unwind: "$vehicleDetails" },
+
+    { $match: matchStage },
+
+    {
+      $project: {
+        _id: 1,
+        userEmail: 1,
+        bookingStatus: "$vehicleDetails.bookingStatus",
+        pickupDate: "$vehicleDetails.pickupDate",
+        dropOffDate: "$vehicleDetails.dropOffDate",
+        price: "$vehicleDetails.price",
+        extraExpenditure: "$vehicleDetails.extraExpenditure",
+        tax: "$vehicleDetails.tax",
+        totalPrice: "$vehicleDetails.totalPrice",
+        uniqueBookingId: "$vehicleDetails.uniqueBookingId",
+        // createdAt: "$vehicleDetails.createdAt",
+
+        userDetails: 1,
+
         vehicleDetails: {
-          name: vehicle.name || null,
-          model: vehicle.model || null,
-          description: vehicle.description || null,
-          vehicleType: vehicle.vehicleType || null,
-          uniqueVehicleId: vehicle.uniqueVehicleId || null,
-          vehicleStatus: vehicle.vehicleStatus || false,
-          location: vehicle.location || null,
-          vehicleNumber: vehicle.vehicleNumber || null,
-          vehicleMilage: vehicle.vehicleMilage || null,
-          filePath: vehicle.filePath || [],
+          name: "$vehicleDetails.name",
+          model: "$vehicleDetails.model",
+          vehicleNumber: "$vehicleDetails.vehicleNumber",
         },
-        bookingStatus: vehicle.bookingStatus || null,
-        pickupDate: vehicle.pickupDate || null,
-        dropOffDate: vehicle.dropOffDate || null,
-        price: vehicle.price || 0,
-        extraExpenditure: vehicle.extraExpenditure || 0,
-        tax: vehicle.tax || 0,
-        totalPrice: vehicle.totalPrice || 0,
-        uniqueBookingId: vehicle.uniqueBookingId || null,
-        createdAt: vehicle.createdAt || null,
-        userDetails: doc.userDetails || {},
-      });
-    });
-  });
+      },
+    },
+  ]);
 
-  if (matchedBookings.length === 0) {
+  if (!data.length) {
     return next(new AppError("No bookings found.", 404));
   }
 
   res.status(200).json({
     status: "success",
-    data: matchedBookings,
+    count: data.length,
+    data,
   });
 });
 
 exports.getAllVehicleListData = catchAsync(async (req, res, next) => {
-  const role = req.user.userType;
-  // Check if the user is an admin
-  if (role !== "admin") {
-    return next(new AppError("You are not authorized to view this data", 403));
+  const data = await vehicleModel.aggregate([
+    {
+      $project: {
+        name: 1,
+        vehicleType: 1,
+        model: 1,
+        bookingPrice: 1,
+
+        specificVehicleDetails: {
+          $map: {
+            input: "$specificVehicleDetails",
+            as: "detail",
+            in: {
+              vehicleNumber: "$$detail.vehicleNumber",
+              vehicleStatus: "$$detail.vehicleStatus",
+              notAvailableReason: "$$detail.notAvailableReason",
+              createdAt: "$$detail.createdAt",
+              updatedAt: "$$detail.updatedAt",
+            },
+          },
+        },
+      },
+    },
+    {
+      $addFields: {
+        count: { $size: "$specificVehicleDetails" },
+      },
+    },
+  ]);
+
+  if (!data.length) {
+    return next(new AppError("No Vehicle found", 404));
   }
-
-  // Fetch all vehicles
-  const AllVehicleData = await vehicleModel.find({});
-
-  // Check if any vehicles were found
-  if (!AllVehicleData || AllVehicleData.length === 0) {
-    return next(
-      new AppError("No bookings found for the specified status", 404)
-    );
-  }
-
-  // Filter the fields as requested
-  const filteredData = AllVehicleData.map((vehicle) => ({
-    name: vehicle.name,
-    vehicleType: vehicle.vehicleType,
-    model: vehicle.model,
-    bookingPrice: vehicle.bookingPrice,
-    specificVehicleDetails: (vehicle.specificVehicleDetails || []).map(
-      (detail) => ({
-        vehicleNumber: detail.vehicleNumber,
-        vehicleStatus: detail.vehicleStatus,
-        notAvailableReason: detail.notAvailableReason,
-        createdAt: detail.createdAt,
-        updatedAt: detail.updatedAt,
-      })
-    ),
-  }));
 
   res.status(200).json({
     status: "success",
-    data: filteredData,
-    count: filteredData.length,
+    count: data.length,
+    data,
   });
 });
 
 exports.getAllUserListData = catchAsync(async (req, res, next) => {
-  const role = req.user.userType;
-  // Check if the user is an admin
-  if (role !== "admin") {
-    return next(new AppError("You are not authorized to view this data", 403));
-  }
-
   // Fetch all users
   const AllUserData = await userModel.find({});
 
@@ -114,12 +106,19 @@ exports.getAllUserListData = catchAsync(async (req, res, next) => {
 
   // Filter the fields as requested
   const filteredData = AllUserData.map((user) => ({
+    id:user._id,
     name: user.name,
     email: user.email,
     phoneNumber: user.phoneNumber,
     userType: user.userType,
+    totalBooking: user.bookingInfo?.totalBooking,
+    activeBooking: user.bookingInfo?.activeBooking,
+    moneySpend: user.bookingInfo?.moneySpend,
+    cancelbooking: user.bookingInfo?.cancelbooking,
+    drivingLicenceNumber: user.drivingLicenceNumber,
+    isDLverify: user.isDLverify,
     createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
+    // updatedAt: user.updatedAt,
   }));
 
   const count = filteredData.length;
@@ -131,160 +130,511 @@ exports.getAllUserListData = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllNotAvailableVehicleListData = catchAsync(
-  async (req, res, next) => {
-    const role = req.user.userType;
-    // Check if the user is an admin
-    if (role !== "admin") {
-      return next(
-        new AppError("You are not authorized to view this data", 403)
-      );
-    }
 
-    // Fetch all vehicles
-    const AllVehicleData = await vehicleModel.find({});
 
-    // Check if any vehicles were found
-    if (!AllVehicleData || AllVehicleData.length === 0) {
-      return next(
-        new AppError("No bookings found for the specified status", 404)
-      );
-    }
+// exports.getAllAvailableVehicleListData = catchAsync(async (req, res, next) => {
+//   // const data = await vehicleModel.aggregate([
+//   //   {
+//   //     $project: {
+//   //       name: 1,
+//   //       vehicleType: 1,
+//   //       model: 1,
+//   //       specificVehicleDetails: {
+//   //         $filter: {
+//   //           input: "$specificVehicleDetails",
+//   //           as: "detail",
+//   //           cond: { $eq: ["$$detail.vehicleStatus", true] }, // ✅ AVAILABLE
+//   //         },
+//   //       },
+//   //     },
+//   //   },
+//   //   {
+//   //     $addFields: {
+//   //       specificVehicleDetailsCount: {
+//   //         $size: "$specificVehicleDetails",
+//   //       },
+//   //     },
+//   //   },
+//   //   {
+//   //     $match: {
+//   //       specificVehicleDetailsCount: { $gt: 0 },
+//   //     },
+//   //   },
+//   //   {
+//   //     $project: {
+//   //       name: 1,
+//   //       vehicleType: 1,
+//   //       model: 1,
+//   //       specificVehicleDetailsCount: 1,
+//   //       specificVehicleDetails: {
+//   //         uniqueVehicleId: 1,
+//   //         vehicleStatus: 1,
+//   //         vehicleNumber: 1,
+//   //       },
+//   //     },
+//   //   },
+//   // ]);
+//   const data = await vehicleModel.aggregate([
+//     // 1️⃣ explode array
+//     {
+//       $unwind: "$specificVehicleDetails",
+//     },
 
-    const filteredData = AllVehicleData.map((vehicle) => {
-      const specificVehicleDetails = (
-        vehicle.specificVehicleDetails || []
-      ).filter(
-        (detail) =>
-          typeof detail.vehicleStatus === "string" ||
-          detail.vehicleStatus === false
-      );
-      return {
-        name: vehicle.name,
-        vehicleType: vehicle.vehicleType,
-        model: vehicle.model,
-        specificVehicleDetails,
-        specificVehicleDetailsCount: specificVehicleDetails.length,
-      };
-    }).filter((vehicle) => vehicle.specificVehicleDetails.length > 0);
-    // Filter the fields as requested
+//     // 2️⃣ filter EARLY (critical)
+//     {
+//       $match: {
+//         "specificVehicleDetails.vehicleStatus": true,
+//       },
+//     },
 
-    const count = filteredData.length;
+//     // 3️⃣ keep only required fields
+//     {
+//       $project: {
+//         name: 1,
+//         vehicleType: 1,
+//         model: 1,
+//         "specificVehicleDetails.uniqueVehicleId": 1,
+//         "specificVehicleDetails.vehicleStatus": 1,
+//         "specificVehicleDetails.notAvailableReason": 1,
+//         "specificVehicleDetails.vehicleNumber": 1,
+//       },
+//     },
 
-    res.status(200).json({
-      status: "success",
-      data: count,
-    });
+//     // 4️⃣ regroup per vehicle
+//     {
+//       $group: {
+//         _id: "$_id",
+//         name: { $first: "$name" },
+//         vehicleType: { $first: "$vehicleType" },
+//         model: { $first: "$model" },
+//         specificVehicleDetails: { $push: "$specificVehicleDetails" },
+//         specificVehicleDetailsCount: { $sum: 1 },
+//       },
+//     },
+//   ]);
+
+//   if (!data.length) {
+//     return next(new AppError("No available vehicles found", 404));
+//   }
+
+//   const totalAvailableVehicles = data.reduce(
+//     (sum, v) => sum + v.specificVehicleDetailsCount,
+//     0
+//   );
+
+//   res.status(200).json({
+//     status: "success",
+//     vehicleGroupCount: data.length,
+//     count: totalAvailableVehicles,
+//     // data,
+//   });
+// });
+
+exports.getAllNotAvailableVehicleListData = catchAsync(async (req, res, next) => {
+  const result = await vehicleModel.aggregate([
+    /* ===================== STEP 1 ===================== */
+    // Unwind vehicle array (critical for performance)
+    {
+      $unwind: "$specificVehicleDetails",
+    },
+
+    /* ===================== STEP 2 ===================== */
+    // Filter NOT AVAILABLE vehicles only
+    {
+      $match: {
+        "specificVehicleDetails.vehicleStatus": false,
+      },
+    },
+
+    /* ===================== STEP 3 ===================== */
+    // Keep only required fields
+    {
+      $project: {
+        name: 1,
+        vehicleType: 1,
+        model: 1,
+        "specificVehicleDetails.uniqueVehicleId": 1,
+        "specificVehicleDetails.vehicleStatus": 1,
+        // "specificVehicleDetails.notAvailableReason": 1,
+        "specificVehicleDetails.vehicleNumber": 1,
+      },
+    },
+
+    /* ===================== STEP 4 ===================== */
+    // Facet: list + total count
+    {
+      $facet: {
+        list: [
+          {
+            $group: {
+              _id: "$_id",
+              name: { $first: "$name" },
+              vehicleType: { $first: "$vehicleType" },
+              model: { $first: "$model" },
+              specificVehicleDetails: {
+                $push: "$specificVehicleDetails",
+              },
+              specificVehicleDetailsCount: { $sum: 1 },
+            },
+          },
+        ],
+        totalCount: [
+          {
+            $count: "count",
+          },
+        ],
+      },
+    },
+  ]);
+
+  /* ===================== RESPONSE ===================== */
+
+  const list = result[0]?.list || [];
+  const totalUnavailableVehicles = result[0]?.totalCount[0]?.count || 0;
+
+  if (!list.length) {
+    return next(new AppError("No unavailable vehicles found", 404));
   }
-);
-exports.getAllVehicleAvailableList = catchAsync(async (req, res, next) => {
-  const role = req.user.userType;
-  // Check if the user is an admin
-  if (role !== "admin") {
-    return next(new AppError("You are not authorized to view this data", 403));
-  }
-
-  // Fetch all vehicles
-  const AllVehicleData = await vehicleModel.find({});
-
-  // Check if any vehicles were found
-  if (!AllVehicleData || AllVehicleData.length === 0) {
-    return next(
-      new AppError("No bookings found for the specified status", 404)
-    );
-  }
-
-  // Filter the fields as requested
-  const filteredData = AllVehicleData.map((vehicle) => {
-    const specificVehicleDetails = (
-      vehicle.specificVehicleDetails || []
-    ).filter(
-      (detail) =>
-        typeof detail.vehicleStatus === "string" ||
-        detail.vehicleStatus === true
-    );
-    return {
-      name: vehicle.name,
-      vehicleType: vehicle.vehicleType,
-      model: vehicle.model,
-      specificVehicleDetails,
-      specificVehicleDetailsCount: specificVehicleDetails.length,
-    };
-  }).filter((vehicle) => vehicle.specificVehicleDetails.length > 0);
 
   res.status(200).json({
     status: "success",
-    data: filteredData,
+    vehicleGroupCount: list.length,
+    count: totalUnavailableVehicles, // ✅ ONLY unavailable
+    data: list,
+  });
+});
+exports.getAllAvailableVehicleListData = catchAsync(async (req, res, next) => {
+  const result = await vehicleModel.aggregate([
+    /* ===================== STEP 1 ===================== */
+    // Unwind vehicle array (critical for performance)
+    {
+      $unwind: "$specificVehicleDetails",
+    },
+
+    /* ===================== STEP 2 ===================== */
+    // Filter  AVAILABLE vehicles only
+    {
+      $match: {
+        "specificVehicleDetails.vehicleStatus": true,
+      },
+    },
+
+    /* ===================== STEP 3 ===================== */
+    // Keep only required fields
+    {
+      $project: {
+        name: 1,
+        vehicleType: 1,
+        model: 1,
+        "specificVehicleDetails.uniqueVehicleId": 1,
+        "specificVehicleDetails.vehicleStatus": 1,
+        // "specificVehicleDetails.notAvailableReason": 1,
+        "specificVehicleDetails.vehicleNumber": 1,
+      },
+    },
+
+    /* ===================== STEP 4 ===================== */
+    // Facet: list + total count
+    {
+      $facet: {
+        list: [
+          {
+            $group: {
+              _id: "$_id",
+              name: { $first: "$name" },
+              vehicleType: { $first: "$vehicleType" },
+              model: { $first: "$model" },
+              specificVehicleDetails: {
+                $push: "$specificVehicleDetails",
+              },
+              specificVehicleDetailsCount: { $sum: 1 },
+            },
+          },
+        ],
+        totalCount: [
+          {
+            $count: "count",
+          },
+        ],
+      },
+    },
+  ]);
+
+  /* ===================== RESPONSE ===================== */
+
+  const list = result[0]?.list || [];
+  const totalUnavailableVehicles = result[0]?.totalCount[0]?.count || 0;
+
+  if (!list.length) {
+    return next(new AppError("No unavailable vehicles found", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    vehicleGroupCount: list.length,
+    count: totalUnavailableVehicles, // ✅ ONLY unavailable
+    data: list,
   });
 });
 
-exports.getAllScootyVehicleAvailableList = catchAsync(
-  async (req, res, next) => {
-    const role = req.user.userType;
-    // Check if the user is an admin
-    if (role !== "admin") {
-      return next(
-        new AppError("You are not authorized to view this data", 403)
-      );
-    }
+exports.getVehicleTypeCount = catchAsync(async (req, res, next) => {
+  const data = await vehicleModel.aggregate([
+    {
+      $group: {
+        _id: "$vehicleType",
+        count: { $sum: 1 },
+      },
+    },
+  ]);
 
-    // Fetch all vehicles
-    const AllVehicleData = await vehicleModel.find({});
-
-    // Check if any vehicles were found
-    if (!AllVehicleData || AllVehicleData.length === 0) {
-      return next(
-        new AppError("No bookings found for the specified status", 404)
-      );
-    }
-
-    // Filter for Scooty vehicles and return required details
-    const filteredData = AllVehicleData.filter(
-      (vehicle) => vehicle.vehicleType === "Scooty"
-    ).map((vehicle) => ({
-      name: vehicle.name,
-      vehicleType: vehicle.vehicleType,
-      model: vehicle.model,
-      bookingPrice: vehicle.bookingPrice,
-    }));
-
-    res.status(200).json({
-      status: "success",
-      data: filteredData,
-      count: filteredData.length,
-    });
-  }
-);
-exports.getAllBikeVehicleAvailableList = catchAsync(async (req, res, next) => {
-  const role = req.user.userType;
-  // Check if the user is an admin
-  if (role !== "admin") {
-    return next(new AppError("You are not authorized to view this data", 403));
+  if (!data.length) {
+    return next(new AppError("No vehicles found", 404));
   }
 
-  // Fetch all vehicles
-  const AllVehicleData = await vehicleModel.find({});
+  // Convert aggregation array → clean object
+  const counts = {};
+  let totalVehicles = 0;
 
-  // Check if any vehicles were found
-  if (!AllVehicleData || AllVehicleData.length === 0) {
-    return next(
-      new AppError("No bookings found for the specified status", 404)
-    );
-  }
-
-  // Filter for Scooty vehicles and return required details
-  const filteredData = AllVehicleData.filter(
-    (vehicle) => vehicle.vehicleType === "Bike"
-  ).map((vehicle) => ({
-    name: vehicle.name,
-    vehicleType: vehicle.vehicleType,
-    model: vehicle.model,
-    bookingPrice: vehicle.bookingPrice,
-  }));
+  data.forEach((item) => {
+    counts[item._id] = item.count;
+    totalVehicles += item.count;
+  });
 
   res.status(200).json({
     status: "success",
-    data: filteredData,
-    count: filteredData.length,
+    totalVehicles,
+    counts,
+  });
+});
+
+// exports.getAdminBookingMetrics = catchAsync(async (req, res, next) => {
+//   const today = new Date();
+
+//   const metrics = await vehicleBookingModel.aggregate([
+//     { $unwind: "$vehicleDetails" },
+
+//     {
+//       $facet: {
+//         // 🔹 Overall Summary
+//         summary: [
+//           {
+//             $group: {
+//               _id: null,
+//               totalBookings: { $sum: 1 },
+//               totalRevenue: {
+//                 $sum: {
+//                   $cond: [
+//                     { $ne: ["$vehicleDetails.bookingStatus", "cancelled"] },
+//                     "$vehicleDetails.totalPrice",
+//                     0,
+//                   ],
+//                 },
+//               },
+//             },
+//           },
+//         ],
+
+//         // 🔹 Booking Status Breakdown
+//         bookingStatusStats: [
+//           {
+//             $group: {
+//               _id: "$vehicleDetails.bookingStatus",
+//               count: { $sum: 1 },
+//               revenue: { $sum: "$vehicleDetails.totalPrice" },
+//             },
+//           },
+//         ],
+
+//         // 🔹 Upcoming Pickups
+//         upcomingPickups: [
+//           {
+//             $match: {
+//               "vehicleDetails.pickupDate": { $gte: today },
+//               "vehicleDetails.bookingStatus": "confirmed",
+//             },
+//           },
+//           { $count: "count" },
+//         ],
+
+//         // 🔹 Active Bookings
+//         activeBookings: [
+//           {
+//             $match: {
+//               // "vehicleDetails.pickupDate": { $lte: today },
+//               "vehicleDetails.dropOffDate": { $gte: today },
+//               "vehicleDetails.bookingStatus": "confirmed",
+//             },
+//           },
+//           { $count: "count" },
+//         ],
+
+//         // 🔹 Cancelled Bookings
+//         cancelledBookings: [
+//           {
+//             $match: {
+//               "vehicleDetails.bookingStatus": "cancelled",
+//             },
+//           },
+//           { $count: "count" },
+//         ],
+//       },
+//     },
+//   ]);
+
+//   const data = metrics[0];
+
+//   res.status(200).json({
+//     status: "success",
+//     dashboard: {
+//       totalBookings: data.summary[0]?.totalBookings || 0,
+//       totalRevenue: data.summary[0]?.totalRevenue || 0,
+
+//       upcomingPickups: data.upcomingPickups[0]?.count || 0,
+//       activeBookings: data.activeBookings[0]?.count || 0,
+//       cancelledBookings: data.cancelledBookings[0]?.count || 0,
+//       bookingStatusStats: data.bookingStatusStats,
+//     },
+//   });
+// });
+
+// Get the range
+const getDateRange = (range) => {
+  const now = new Date();
+  let startDate = null;
+
+  switch (range) {
+    case "today":
+      startDate = new Date(now.setHours(0, 0, 0, 0));
+      break;
+
+    case "week":
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+      break;
+
+    case "month":
+      startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 1);
+      break;
+
+    case "year":
+      startDate = new Date();
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      break;
+
+    case "all":
+    default:
+      startDate = null;
+  }
+
+  return startDate;
+};
+
+exports.getAdminBookingMetrics = catchAsync(async (req, res, next) => {
+  const { range = "all" } = req.query;
+
+  const today = new Date();
+  const startDate = getDateRange(range);
+
+  const matchStage = startDate
+    ? { "vehicleDetails.createdAt": { $gte: startDate } }
+    : {};
+
+  const metrics = await vehicleBookingModel.aggregate([
+    { $unwind: "$vehicleDetails" },
+
+    // 🔹 DATE FILTER (Injected once)
+    { $match: matchStage },
+
+    {
+      $facet: {
+        // 🔹 OVERALL SUMMARY
+        summary: [
+          {
+            $group: {
+              _id: null,
+              totalBookings: { $sum: 1 },
+              totalRevenue: {
+                $sum: {
+                  $cond: [
+                    { $ne: ["$vehicleDetails.bookingStatus", "cancelled"] },
+                    "$vehicleDetails.totalPrice",
+                    0,
+                  ],
+                },
+              },
+            },
+          },
+        ],
+
+        // 🔹 BOOKING STATUS STATS
+        bookingStatusStats: [
+          {
+            $group: {
+              _id: "$vehicleDetails.bookingStatus",
+              count: { $sum: 1 },
+              revenue: {
+                $sum: {
+                  $cond: [
+                    { $ne: ["$vehicleDetails.bookingStatus", "cancelled"] },
+                    "$vehicleDetails.totalPrice",
+                    0,
+                  ],
+                },
+              },
+            },
+          },
+        ],
+
+        // 🔹 UPCOMING PICKUPS
+        upcomingPickups: [
+          {
+            $match: {
+              "vehicleDetails.pickupDate": { $gte: today },
+              "vehicleDetails.bookingStatus": "confirmed",
+            },
+          },
+          { $count: "count" },
+        ],
+
+        // 🔹 ACTIVE BOOKINGS
+        activeBookings: [
+          {
+            $match: {
+              "vehicleDetails.dropOffDate": { $gte: today },
+              "vehicleDetails.bookingStatus": "confirmed",
+            },
+          },
+          { $count: "count" },
+        ],
+
+        // 🔹 CANCELLED BOOKINGS
+        cancelledBookings: [
+          {
+            $match: {
+              "vehicleDetails.bookingStatus": "cancelled",
+            },
+          },
+          { $count: "count" },
+        ],
+      },
+    },
+  ]);
+
+  const data = metrics[0] || {};
+
+  res.status(200).json({
+    status: "success",
+    range,
+    data: {
+      totalBookings: data.summary?.[0]?.totalBookings || 0,
+      totalRevenue: data.summary?.[0]?.totalRevenue || 0,
+
+      upcomingPickups: data.upcomingPickups?.[0]?.count || 0,
+      activeBookings: data.activeBookings?.[0]?.count || 0,
+      // cancelledBookings: data.cancelledBookings?.[0]?.count || 0,
+
+      bookingStatusStats: data.bookingStatusStats || [],
+    },
   });
 });

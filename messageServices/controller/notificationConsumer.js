@@ -59,7 +59,6 @@ async function notificationConsumer(rolename, io) {
       await channel.bindQueue(queueName, EXCHANGE, "notify.user.*");
     }
 
-    console.log(`📌 Listening for notifications: ${queueName}`);
 
     channel.consume(
       queueName,

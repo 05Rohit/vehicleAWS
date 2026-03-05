@@ -342,3 +342,18 @@
 .cancelButton {
   background: linear-gradient(90deg, #f34b4b, #f71f1f);
 }
+
+.cross_btn {
+  color: red;
+  font-weight: 800;
+  border: 1px solid rgb(221, 109, 109);
+  border-radius: 5px;
+  padding: 2px 3px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.cross_btn:hover {
+  transform: scale(1.2);
+  background-color: rgba(255, 0, 0, 0.1);
+}
